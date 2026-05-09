@@ -1,5 +1,5 @@
 import type { TournamentArchiveV1 } from '../lib/tournamentArchive'
-import type { TournamentState } from '../domain/types'
+import type { TournamentFormat, TournamentState } from '../domain/types'
 
 const isDev = import.meta.env.DEV
 
@@ -106,6 +106,10 @@ export type TournamentListEntry = {
   id: string
   name: string
   updatedAt: string | null
+  /** Dérivé de state.json ou config.json ; absent si ancien dossier. */
+  format?: TournamentFormat
+  playerCount?: number
+  maxRounds?: number
 }
 
 export async function serverListTournaments(): Promise<

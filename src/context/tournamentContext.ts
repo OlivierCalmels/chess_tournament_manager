@@ -1,5 +1,8 @@
 import { createContext } from 'react'
+import type { InitialTournamentOptions } from '../domain/tournamentFactory'
 import type { MatchResult, Player, TournamentState } from '../domain/types'
+
+export type TieBreakChoice = 'A' | 'B'
 
 export type TournamentContextValue = {
   state: TournamentState | null
@@ -10,11 +13,17 @@ export type TournamentContextValue = {
     players: Player[],
     tournamentName?: string | null,
     maxRounds?: number | null,
+    options?: InitialTournamentOptions | null,
   ) => Promise<void>
   setMatchResult: (
     roundIndex: number,
     pairingIndex: number,
     result: MatchResult,
+  ) => Promise<void>
+  setTieBreakResult: (
+    roundIndex: number,
+    pairingIndex: number,
+    winner: TieBreakChoice,
   ) => Promise<void>
   validateRound: () => Promise<void>
   resetTournament: () => void

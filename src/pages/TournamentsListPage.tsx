@@ -132,7 +132,11 @@ export function TournamentsListPage() {
                 {state.tournamentName}
               </p>
               <p className="mt-0.5 text-xs text-zinc-600">
-                Ronde {state.activeRoundIndex} / {state.maxRounds}
+                {(state.format ?? 'swiss') === 'elimination'
+                  ? 'Élimination rapide'
+                  : 'Suisse'}{' '}
+                · {state.players.length} joueurs · Ronde{' '}
+                {state.activeRoundIndex} / {state.maxRounds}
                 {state.finished ? ' · terminé' : ''}
               </p>
             </div>
@@ -240,6 +244,24 @@ export function TournamentsListPage() {
                       ) : null}
                     </p>
                     <p className="font-mono text-xs text-zinc-600">{t.id}</p>
+                    {(() => {
+                      const summary = [
+                        t.format === 'elimination'
+                          ? 'Élimination rapide'
+                          : t.format === 'swiss'
+                            ? 'Suisse'
+                            : null,
+                        typeof t.playerCount === 'number'
+                          ? `${t.playerCount} joueur${t.playerCount > 1 ? 's' : ''}`
+                          : null,
+                        typeof t.maxRounds === 'number'
+                          ? `${t.maxRounds} ${t.maxRounds <= 1 ? 'ronde' : 'rondes'}`
+                          : null,
+                      ].filter(Boolean).join(' · ')
+                      return summary ?
+                          <p className="mt-1 text-xs text-zinc-700">{summary}</p>
+                        : null
+                    })()}
                     {t.updatedAt ? (
                       <p className="text-xs text-zinc-500">
                         MAJ :{' '}

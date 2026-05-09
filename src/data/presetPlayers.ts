@@ -1,13 +1,13 @@
 /** Liste bureau : saisie manuelle ou choix rapide au setup. */
 export const PRESET_PLAYERS = [
-  { name: 'Alice', elo: 700 },
-  { name: 'Bruno', elo: 660 },
-  { name: 'Chloé', elo: 610 },
-  { name: 'David', elo: 600 },
-  { name: 'Eva', elo: 550 },
-  { name: 'Fabien', elo: 550 },
-  { name: 'Gabriel', elo: 400 },
-  { name: 'Hanna', elo: 400 },
+  { name: 'Adel', elo: 700 },
+  { name: 'Johann', elo: 660 },
+  { name: 'Olivier', elo: 610 },
+  { name: 'Adrian', elo: 600 },
+  { name: 'Hamza', elo: 550 },
+  { name: 'Hedi', elo: 550 },
+  { name: 'Paul L.', elo: 400 },
+  { name: 'Paul W.', elo: 400 },
 ] as const
 
 export type PresetRow = { name: string; elo: string }

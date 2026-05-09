@@ -1,5 +1,5 @@
 import type { Player, Pairing, RoundState, TournamentState } from './types'
-import { computeScores, hasPlayed } from './scoring'
+import { computeScores, hasPlayed, pairingIsResolved } from './scoring'
 
 function pairHighLow(orderedByStrength: Player[]): Pairing[] {
   const n = orderedByStrength.length
@@ -115,13 +115,14 @@ export function buildRoundPairings(
 }
 
 export function opponentsMap(state: TournamentState): Map<string, string[]> {
+  const format = state.format ?? 'swiss'
   const m = new Map<string, string[]>()
   for (const p of state.players) {
     m.set(p.id, [])
   }
   for (const r of state.rounds) {
     for (const pair of r.pairings) {
-      if (pair.playerBId === null || pair.result === null) continue
+      if (pair.playerBId === null || !pairingIsResolved(pair, format)) continue
       const a = pair.playerAId
       const b = pair.playerBId
       m.get(a)?.push(b)

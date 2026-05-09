@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { flushSync } from 'react-dom'
 import {
   fetchPublicState,
   serverDeleteTournament,
@@ -18,18 +19,23 @@ import {
   PUBLIC_POLL_INTERVAL_MS,
   PUBLIC_STATE_URL,
 } from '../config'
+import {
+  eliminationBracketComplete,
+  nextEliminationRoundPairings,
+} from '../domain/eliminationPairing'
 import { buildRoundPairings } from '../domain/pairing'
 import {
   canValidateRound,
   initialTournamentState,
   normalizeTournamentState,
   rosterSnapshotPayload,
+  type InitialTournamentOptions,
 } from '../domain/tournamentFactory'
 import type { MatchResult, Player, TournamentState } from '../domain/types'
 import { parseImportedTournamentJson } from '../lib/tournamentArchive'
 import { hashRosterPayload } from '../lib/rosterHash'
 import { clearLocal, loadLocal, saveLocal } from '../lib/storage'
-import { TournamentContext } from './tournamentContext'
+import { TournamentContext, type TieBreakChoice } from './tournamentContext'
 
 function cloneState(s: TournamentState): TournamentState {
   return structuredClone(s)
@@ -122,9 +128,15 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       players: Player[],
       tournamentName?: string | null,
       maxRounds?: number | null,
+      options?: InitialTournamentOptions | null,
     ) => {
       setError(null)
-      const next = initialTournamentState(players, tournamentName, maxRounds)
+      const next = initialTournamentState(
+        players,
+        tournamentName,
+        maxRounds,
+        options ?? undefined,
+      )
       const rosterSnap = rosterSnapshotPayload(next)
       const rosterJson = JSON.stringify(rosterSnap)
       const rosterSha256 = await hashRosterPayload(rosterJson)
@@ -148,9 +160,11 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      setState(next)
-      saveLocal({ tournamentId: next.tournamentId, state: next })
-      setLastSyncedAt(new Date().toISOString())
+      flushSync(() => {
+        setState(next)
+        saveLocal({ tournamentId: next.tournamentId, state: next })
+        setLastSyncedAt(new Date().toISOString())
+      })
     },
     [],
   )
@@ -164,13 +178,50 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       const pairing = round.pairings[pairingIndex]
       if (!pairing) return
       pairing.result = result
+      if (result !== 'draw') {
+        delete pairing.tieBreakResult
+      }
       setState(next)
-      await persist(next, {
-        type: 'RESULT_SET',
-        roundIndex,
-        pairingIndex,
-        result,
-      }, true)
+      await persist(
+        next,
+        {
+          type: 'RESULT_SET',
+          roundIndex,
+          pairingIndex,
+          result,
+        },
+        true,
+      )
+    },
+    [persist, state],
+  )
+
+  const setTieBreakResult = useCallback(
+    async (
+      roundIndex: number,
+      pairingIndex: number,
+      winner: TieBreakChoice,
+    ) => {
+      if (!state || isSpectatorMode) return
+      const next = cloneState(state)
+      const round = next.rounds.find((r) => r.roundIndex === roundIndex)
+      if (!round || round.completed) return
+      const pairing = round.pairings[pairingIndex]
+      if (!pairing || pairing.playerBId === null || pairing.result !== 'draw') {
+        return
+      }
+      pairing.tieBreakResult = winner
+      setState(next)
+      await persist(
+        next,
+        {
+          type: 'TIEBREAK_SET',
+          roundIndex,
+          pairingIndex,
+          tieBreakResult: winner,
+        },
+        true,
+      )
     },
     [persist, state],
   )
@@ -186,15 +237,59 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
     if (idx === -1) return
     next.rounds[idx] = { ...next.rounds[idx], completed: true }
 
+    const format = next.format ?? 'swiss'
+
+    if (format === 'elimination') {
+      const newRoundIndex = next.activeRoundIndex + 1
+      const more = nextEliminationRoundPairings(next)
+
+      if (more.length === 0) {
+        next.finished = eliminationBracketComplete(next)
+        setState(next)
+        await persist(
+          next,
+          {
+            type: 'ROUND_VALIDATED',
+            roundIndex: next.activeRoundIndex,
+            finished: next.finished,
+          },
+          false,
+        )
+        return
+      }
+
+      next.rounds.push({
+        roundIndex: newRoundIndex,
+        pairings: more,
+        completed: false,
+      })
+      next.activeRoundIndex = newRoundIndex
+      setState(next)
+      await persist(
+        next,
+        {
+          type: 'ROUND_VALIDATED',
+          roundIndex: next.activeRoundIndex - 1,
+          nextRound: newRoundIndex,
+        },
+        false,
+      )
+      return
+    }
+
     const completedCount = next.rounds.filter((r) => r.completed).length
     if (completedCount >= next.maxRounds) {
       next.finished = true
       setState(next)
-      await persist(next, {
-        type: 'ROUND_VALIDATED',
-        roundIndex: next.activeRoundIndex,
-        finished: true,
-      }, false)
+      await persist(
+        next,
+        {
+          type: 'ROUND_VALIDATED',
+          roundIndex: next.activeRoundIndex,
+          finished: true,
+        },
+        false,
+      )
       return
     }
 
@@ -210,11 +305,15 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
     })
     next.activeRoundIndex = newRoundIndex
     setState(next)
-    await persist(next, {
-      type: 'ROUND_VALIDATED',
-      roundIndex: next.activeRoundIndex - 1,
-      nextRound: newRoundIndex,
-    }, false)
+    await persist(
+      next,
+      {
+        type: 'ROUND_VALIDATED',
+        roundIndex: next.activeRoundIndex - 1,
+        nextRound: newRoundIndex,
+      },
+      false,
+    )
   }, [persist, state])
 
   const resetTournament = useCallback(() => {
@@ -230,12 +329,14 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       setError('import_invalid')
       return
     }
-    setState(normalized)
-    saveLocal({
-      tournamentId: normalized.tournamentId,
-      state: normalized,
+    flushSync(() => {
+      setState(normalized)
+      saveLocal({
+        tournamentId: normalized.tournamentId,
+        state: normalized,
+      })
+      setError(null)
     })
-    setError(null)
   }, [])
 
   const deleteTournament = useCallback(
@@ -279,13 +380,15 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       return false
     }
     const normalized = normalizeTournamentState(next)
-    setState(normalized)
-    saveLocal({
-      tournamentId: normalized.tournamentId,
-      state: normalized,
+    flushSync(() => {
+      setState(normalized)
+      saveLocal({
+        tournamentId: normalized.tournamentId,
+        state: normalized,
+      })
+      setLastSyncedAt(new Date().toISOString())
+      setError(null)
     })
-    setLastSyncedAt(new Date().toISOString())
-    setError(null)
     return true
   }, [])
 
@@ -297,6 +400,7 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       isSpectator: isSpectatorMode,
       startTournament,
       setMatchResult,
+      setTieBreakResult,
       validateRound,
       resetTournament,
       importStateJson,
@@ -309,6 +413,7 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       lastSyncedAt,
       startTournament,
       setMatchResult,
+      setTieBreakResult,
       validateRound,
       resetTournament,
       importStateJson,

@@ -9,7 +9,7 @@
 | **Journal** : chaque ligne NDJSON a `prevLineHash`, `stateHash` (SHA-256 du `state.json`), `lineHash` (chaîne sur le lot précédent + enregistrement) | Implémenté |
 | **Réhydratation** : si `state.json` absent, le GET `/api/tournament/:id/state` charge le dernier `snapshots/state-{16}.json` référencé par un `stateHash` dans le journal | Implémenté |
 | **TournamentProvider** (`useState`) + `localStorage` miroir + API locale dev (`serverInit`, `serverPersist`, optionnel `serverSave` POST) | Implémenté |
-| **Middleware Vite** : `PUT …/persist` ou `POST …/save` ; `ENABLE_TOURNAMENT_GIT_SYNC=1` → `git add` / commit / push sur `data/` **uniquement** quand l’événement est `RESULT_SET` (saisie d’un résultat de partie), pas à la validation de ronde | Implémenté |
+| **Middleware Vite** : `PUT …/persist` ou `POST …/save` ; `ENABLE_TOURNAMENT_GIT_SYNC=1` → après **chaque** écriture disque (`persist` / `save`, y compris validation de ronde, départage, etc.) et après **`init`**, `git add` / commit / push sur `data/tournaments/<id>` + `data/public/live.json` | Implémenté |
 | **Site spectateur (Pages forge)** : build `spectateur`, `VITE_PUBLIC_STATE_URL` + polling, pas d’écriture | Voir ci-dessous |
 | **UI** + pages Setup / Rounds / Leaderboard + router | Implémenté |
 
@@ -39,11 +39,13 @@ Fichier public **`data/public/live.json`** : dernier état servi aux spectateurs
 - `DELETE /api/tournament/:id` — supprime le dossier du tournoi ; si c’était le tournoi publié dans `live.json`, le fichier public est vidé (timestamp seul).
 
 - Écriture des fichiers via le middleware Vite.
-- Optionnel : commits / push automatiques **après chaque saisie de résultat** (`RESULT_SET` + `triggerGit: true`) :
+- Optionnel : commits / push automatiques **après chaque persistance locale** et **après création de tournoi** (pour pousser `live.json` vers la forge tout de suite, utile avec le spectateur Pages) :
 
 ```bash
 ENABLE_TOURNAMENT_GIT_SYNC=1 npm run dev
 ```
+
+Prérequis : dépôt git configuré avec accès **`git push`** (identité / PAT / SSH selon ta machine). À chaque action, plusieurs commits peuvent se succéder — c’est le prix pour un suivi quasi temps réel côté public.
 
 ## Build production
 
@@ -63,7 +65,7 @@ Objectif : publier une **version spectateur** du site (lecture seule) qui affich
 ### Ce que tu obtiens
 
 - Une URL publique de type **`<origine-Pages>/<préfixe-dépôt>/`** (le détail dépend de la forge ; souvent le nom du dépôt apparaît dans le chemin).
-- Mise à jour des **scores** : en général il suffit de **pousser** un nouveau `live.json` sur la branche utilisée dans l’URL du JSON ; **pas besoin** de redéployer le site statique à chaque partie (sous réserve du cache CDN, voir plus bas).
+- Mise à jour des **scores** : en général il suffit de **pousser** un nouveau `live.json` sur la branche utilisée dans l’URL du JSON ; **pas besoin** de relancer **`npm run build:spectateur`** ni un nouveau déploiement Pages pour chaque partie — sauf si tu changes le **code** de l’app ou **`VITE_PUBLIC_STATE_URL`** (sous réserve du cache CDN, voir plus bas).
 
 ### 1. Activer le fournisseur « Pages » + CI
 
@@ -90,10 +92,15 @@ Le workflow le fixe pour le CI courant ainsi :
 
 `VITE_BASE_PATH` est aligné automatiquement sur le **nom du dépôt** dans le fichier de workflow CI (voir `pages.yml`). Tu n’as **rien** à dupliquer à la main côté variables pour ce point si tu gardes cette configuration.
 
-### 4. Déclencher le déploiement
+### 4. Déclencher le **premier** déploiement du site spectateur
 
-- Le workflow **Deploy … Pages** se lance sur chaque **push** sur la branche **`main`** (voir `on:` dans `pages.yml`).
-- Vérifie dans l’onglet **CI** que le job **build** puis **deploy** réussissent ; l’URL du site s’affiche dans les paramètres Pages une fois le premier déploiement réussi.
+- Le workflow **Deploy … Pages** tourne à chaque **push** sur **`main`** avec des changements suivis dans le dépôt (voir `on:` dans `pages.yml`).
+- Vérifie dans l’onglet **CI** que les jobs **build** puis **deploy** sont verts ; l’URL du site apparaît dans **Settings → Pages** une fois terminé (site projet : **`https://<utilisateur>.github.io/<repo>/`**).
+- **Ensuite**, pour le live des scores, **seuls les commits qui touchent `data/`** (souvent via `ENABLE_TOURNAMENT_GIT_SYNC=1` en dev) sont nécessaires — le site statique déjà en ligne continuera à lire le JSON mis à jour.
+
+### 4 bis (optionnel) — Intervalle de polling côté spectateur
+
+Variable dépôt **`VITE_PUBLIC_POLL_INTERVAL_MS`** (millisecondes) : utilisée au build spectateur dans le workflow. Si tu ne la définis pas, la valeur par défaut côté CI est **`4000`** (4 s entre deux requêtes). Tu peux descendre à **`2000`** pour un rafraîchissement plus agressif (plus de requêtes réseau). Il faut **repousser sur `main`** (ou relancer le workflow) pour qu’un nouveau build embarque la valeur.
 
 ### 5. Tester le build spectateur en local
 
@@ -112,7 +119,7 @@ Ouvre l’URL indiquée par Vite ; pour un site sous préfixe, utilise le chemin
 
 1. Depuis la machine du club : `npm run dev`, enregistrement des résultats → `data/public/live.json` mis à jour.
 2. **Commit + push** de `data/public/live.json` (et du reste si besoin) sur la branche référencée dans **`VITE_PUBLIC_STATE_URL`**.
-3. Les spectateurs reçoivent les changements au prochain **polling** (défaut **15 s** ; variable optionnelle `VITE_PUBLIC_POLL_INTERVAL_MS` dans le workflow ou en local).
+3. Les spectateurs reçoivent les changements au prochain **polling** (défaut **4 s** dans le workflow CI si la variable n’est pas définie ; voir § 4 bis ; en local, voir `.env.spectateur`).
 
 **Cache** : l’hôte qui sert le fichier **raw** peut mettre quelques minutes à exposer la dernière version ; ce n’est pas lié au redéploiement du site Pages.
 

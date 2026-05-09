@@ -9,6 +9,7 @@ import {
   rowsFromPresets,
   type PresetRow,
 } from '../data/presetPlayers'
+import { eliminationMaxRounds } from '../domain/eliminationPairing'
 import {
   defaultTournamentName,
   generatePlayerId,
@@ -18,6 +19,7 @@ import {
   MAX_ROUNDS_CAP,
   MIN_ROUNDS,
   type Player,
+  type TournamentFormat,
 } from '../domain/types'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
@@ -46,10 +48,13 @@ export function SetupPage() {
   const [rows, setRows] = useState<PresetRow[]>(() => rowsFromPresets(8))
   const [tournamentName, setTournamentName] = useState('')
   const [maxRounds, setMaxRounds] = useState(DEFAULT_MAX_ROUNDS)
+  const [format, setFormat] = useState<TournamentFormat>('swiss')
+  const [elimFirstRound, setElimFirstRound] = useState<'elo' | 'random'>('elo')
 
   const count = rows.length
   const mParRonde = matchsParRonde(count)
   const mTotal = matchsAuTotal(count, maxRounds)
+  const elimRoundsPlanned = eliminationMaxRounds(count)
 
   const onCountChange = (n: number) => {
     const c = Math.min(MAX_P, Math.max(MIN_P, n))
@@ -76,7 +81,14 @@ export function SetupPage() {
       name: r.name.trim() || 'Sans nom',
       elo: Number.parseInt(r.elo, 10) || 0,
     }))
-    await startTournament(players, tournamentName || null, maxRounds)
+    await startTournament(
+      players,
+      tournamentName || null,
+      format === 'swiss' ? maxRounds : null,
+      format === 'elimination'
+        ? { format: 'elimination', elimFirstRound }
+        : { format: 'swiss' },
+    )
     navigate('/tournaments/rounds')
   }
 
@@ -119,7 +131,7 @@ export function SetupPage() {
   }
 
   if (state) {
-    return <Navigate to="/tournaments" replace />
+    return <Navigate to="/tournaments/rounds" replace />
   }
 
   return (
@@ -138,61 +150,135 @@ export function SetupPage() {
           le tournoi (ex. : {defaultTournamentName()}).
         </p>
         <div className="mt-6 w-full max-w-none space-y-4">
-          <p className="text-sm text-zinc-700">
-            Le <strong>nombre de rondes</strong> choisi correspond au{' '}
-            <strong>nombre de parties disputées par joueur</strong> (une partie
-            par ronde ; en cas de nombre impair de joueurs, un exempt par ronde
-            compte comme une ronde sans partie à l&apos;échiquier pour un
-            inscrit).
-          </p>
           <div>
-            <Label htmlFor="mr">Nombre de rondes</Label>
+            <Label htmlFor="format">Format du tournoi</Label>
             <Select
-              id="mr"
-              value={String(maxRounds)}
+              id="format"
+              value={format}
               onChange={(e) =>
-                setMaxRounds(
-                  Number.parseInt(e.target.value, 10) || DEFAULT_MAX_ROUNDS,
-                )
+                setFormat(e.target.value as TournamentFormat)
               }
-              className="mt-1 max-w-xs"
+              className="mt-1 max-w-md"
             >
-              {Array.from(
-                { length: MAX_ROUNDS_CAP - MIN_ROUNDS + 1 },
-                (_, i) => MIN_ROUNDS + i,
-              ).map((n) => (
-                <option key={n} value={n}>
-                  {n} {n === 1 ? 'ronde' : 'rondes'}
-                </option>
-              ))}
+              <option value="swiss">
+                Suisse (rondes classiques, classement aux points)
+              </option>
+              <option value="elimination">
+                Élimination directe (coupe type Wikipédia + places 5 à N)
+              </option>
             </Select>
-            <p className="mt-1.5 text-xs text-zinc-500">
-              Fixé au lancement ; tu peux aller jusqu&apos;à {MAX_ROUNDS_CAP}{' '}
-              rondes.
-            </p>
           </div>
+          {format === 'elimination' ? (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="elim-seed">Premier tour — appariement</Label>
+                <Select
+                  id="elim-seed"
+                  value={elimFirstRound}
+                  onChange={(e) =>
+                    setElimFirstRound(
+                      (e.target.value === 'random' ? 'random' : 'elo'),
+                    )
+                  }
+                  className="mt-1 max-w-md"
+                >
+                  <option value="elo">
+                    Par ELO (fort affronte faible, mieux classés exempts si
+                    besoin)
+                  </option>
+                  <option value="random">Au hasard (ordre tiré au lancement)</option>
+                </Select>
+                <p className="mt-1.5 text-xs text-zinc-500">
+                  Cet ordre définit les têtes de série pour le tableau (ELO ou
+                  tirage). Les appariements des tours suivants sont imposés par la
+                  structure de la coupe.
+                </p>
+              </div>
+              <p className="text-sm text-zinc-700">
+                Tableau sur puissance de 2 : exempts aux meilleurs seeds au besoin,
+                première colonne façon tableau classique ; seuls les vainqueurs du
+                tableau principal remontent vers la finale. Après les demi-finales :
+                finale + petite finale (3ᵉ place). Pour les autres places :
+                mini-tableaux à élimination. Environ{' '}
+                <strong>{elimRoundsPlanned}</strong>{' '}
+                {elimRoundsPlanned <= 1 ? 'grande vague' : 'grandes vagues'} de
+                saisie. Nulle au tableau : départage en{' '}
+                <strong>5 minutes</strong>, <strong>couleurs inversées</strong>.
+              </p>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm text-zinc-700">
+                Le <strong>nombre de rondes</strong> choisi correspond au{' '}
+                <strong>nombre de parties disputées par joueur</strong> (une
+                partie par ronde ; en cas de nombre impair de joueurs, un
+                exempt par ronde compte comme une ronde sans partie à
+                l&apos;échiquier pour un inscrit).
+              </p>
+              <div>
+                <Label htmlFor="mr">Nombre de rondes</Label>
+                <Select
+                  id="mr"
+                  value={String(maxRounds)}
+                  onChange={(e) =>
+                    setMaxRounds(
+                      Number.parseInt(e.target.value, 10) || DEFAULT_MAX_ROUNDS,
+                    )
+                  }
+                  className="mt-1 max-w-xs"
+                >
+                  {Array.from(
+                    { length: MAX_ROUNDS_CAP - MIN_ROUNDS + 1 },
+                    (_, i) => MIN_ROUNDS + i,
+                  ).map((n) => (
+                    <option key={n} value={n}>
+                      {n} {n === 1 ? 'ronde' : 'rondes'}
+                    </option>
+                  ))}
+                </Select>
+                <p className="mt-1.5 text-xs text-zinc-500">
+                  Fixé au lancement ; tu peux aller jusqu&apos;à {MAX_ROUNDS_CAP}{' '}
+                  rondes.
+                </p>
+              </div>
+            </>
+          )}
           <div className="w-full rounded-lg border border-zinc-200 bg-zinc-50/80 px-3 py-2.5 text-sm text-zinc-800">
             <p className="font-medium text-zinc-900">Matchs (parties à deux)</p>
-            <ul className="mt-1.5 min-h-26 list-outside list-disc space-y-1.5 pl-5 text-zinc-700 sm:min-h-22">
-              <li className="marker:text-zinc-400">
-                <strong>Par ronde</strong> : {mParRonde}{' '}
-                {mParRonde <= 1 ? 'match' : 'matchs'} — avec {count}{' '}
-                joueur{count > 1 ? 's' : ''}.
-                {count % 2 === 1 ? (
-                  <>
-                    {' '}
-                    <span className="block pl-0 pt-0.5 text-zinc-600 sm:inline sm:pl-1 sm:pt-0">
-                      (Impair : un exempt par ronde ; les autres jouent.)
-                    </span>
-                  </>
-                ) : null}
-              </li>
-              <li className="marker:text-zinc-400">
-                <strong>Au total sur le tournoi</strong> : {mTotal}{' '}
-                {mTotal <= 1 ? 'match' : 'matchs'} ({maxRounds}{' '}
-                {maxRounds === 1 ? 'ronde' : 'rondes'} × {mParRonde}).
-              </li>
-            </ul>
+            {format === 'swiss' ? (
+              <ul className="mt-1.5 min-h-26 list-outside list-disc space-y-1.5 pl-5 text-zinc-700 sm:min-h-22">
+                <li className="marker:text-zinc-400">
+                  <strong>Par ronde</strong> : {mParRonde}{' '}
+                  {mParRonde <= 1 ? 'match' : 'matchs'} — avec {count}{' '}
+                  joueur{count > 1 ? 's' : ''}.
+                  {count % 2 === 1 ? (
+                    <>
+                      {' '}
+                      <span className="block pl-0 pt-0.5 text-zinc-600 sm:inline sm:pl-1 sm:pt-0">
+                        (Impair : un exempt par ronde ; les autres jouent.)
+                      </span>
+                    </>
+                  ) : null}
+                </li>
+                <li className="marker:text-zinc-400">
+                  <strong>Au total sur le tournoi</strong> : {mTotal}{' '}
+                  {mTotal <= 1 ? 'match' : 'matchs'} ({maxRounds}{' '}
+                  {maxRounds === 1 ? 'ronde' : 'rondes'} × {mParRonde}).
+                </li>
+              </ul>
+            ) : (
+              <ul className="mt-1.5 list-outside list-disc space-y-1.5 pl-5 text-zinc-700">
+                <li className="marker:text-zinc-400">
+                  <strong>Rondes prévues</strong> : {elimRoundsPlanned} (selon la
+                  taille du tableau, avec exempts si nécessaire).
+                </li>
+                <li className="marker:text-zinc-400">
+                  Chaque joueur affronte des adversaires dans sa moitié de
+                  classement jusqu&apos;à obtenir une place finale unique (1 à{' '}
+                  {count}).
+                </li>
+              </ul>
+            )}
           </div>
         </div>
       </Card>
@@ -218,11 +304,21 @@ export function SetupPage() {
               onChange={(e) => onCountChange(Number(e.target.value))}
             />
             <p className="mt-1.5 min-h-11 text-xs leading-snug text-zinc-600">
-              Avec {count} joueur{count > 1 ? 's' : ''} et {maxRounds}{' '}
-              {maxRounds === 1 ? 'ronde' : 'rondes'} :{' '}
-              <strong>{mParRonde}</strong>{' '}
-              {mParRonde <= 1 ? 'match' : 'matchs'} par ronde,{' '}
-              <strong>{mTotal}</strong> au total.
+              {format === 'swiss' ? (
+                <>
+                  Avec {count} joueur{count > 1 ? 's' : ''} et {maxRounds}{' '}
+                  {maxRounds === 1 ? 'ronde' : 'rondes'} :{' '}
+                  <strong>{mParRonde}</strong>{' '}
+                  {mParRonde <= 1 ? 'match' : 'matchs'} par ronde,{' '}
+                  <strong>{mTotal}</strong> au total.
+                </>
+              ) : (
+                <>
+                  Élimination : <strong>{elimRoundsPlanned}</strong>{' '}
+                  {elimRoundsPlanned === 1 ? 'ronde' : 'rondes'} pour un
+                  classement complet.
+                </>
+              )}
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">

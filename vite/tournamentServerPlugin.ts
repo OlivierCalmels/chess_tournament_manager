@@ -3,7 +3,7 @@
  * data/tournaments/ et data/public/ — l’historique des tournois y vit.
  *
  * Arborescence par tournoi : data/tournaments/{id}/
- *   - config.json — paramètres figés (roster / meta au démarrage)
+ *   - config.json — meta au démarrage : format (suisse | elimination), maxRounds, playerCount, players, etc.
  *   - state.json — état courant (dérivé, lecture rapide)
  *   - events.ndjson — journal append-only (chaîne lineHash + stateHash)
  *   - snapshots/ — copies d’état (state-{16}.json) et roster initial
@@ -171,6 +171,73 @@ function readTournamentDisplayName(id: string): string {
   return id
 }
 
+type TournamentListDiskMeta = {
+  format?: 'swiss' | 'elimination'
+  playerCount?: number
+  maxRounds?: number
+}
+
+/** Infos liste « Tournois sur le disque » : priorité état courant, puis config figée au init. */
+function readTournamentListMetadata(id: string): TournamentListDiskMeta {
+  type PartialMeta = {
+    format?: unknown
+    playerCount?: unknown
+    maxRounds?: unknown
+    players?: unknown
+  }
+  const merge = (doc: PartialMeta, target: TournamentListDiskMeta) => {
+    if (
+      doc.format === 'swiss' ||
+      doc.format === 'elimination'
+    ) {
+      target.format = doc.format
+    }
+    if (typeof doc.playerCount === 'number' && Number.isFinite(doc.playerCount)) {
+      target.playerCount = doc.playerCount
+    }
+    const nPlayers = Array.isArray(doc.players) ? doc.players.length : null
+    if (
+      typeof target.playerCount !== 'number' &&
+      typeof nPlayers === 'number'
+    ) {
+      target.playerCount = nPlayers
+    }
+    if (typeof doc.maxRounds === 'number' && Number.isFinite(doc.maxRounds)) {
+      target.maxRounds = Math.floor(doc.maxRounds)
+    }
+  }
+
+  const out: TournamentListDiskMeta = {}
+
+  const stateRaw = loadTournamentStateSerialized(id)
+  if (stateRaw) {
+    try {
+      merge(JSON.parse(stateRaw) as PartialMeta, out)
+      if (out.format && out.playerCount !== undefined && out.maxRounds !== undefined) {
+        return out
+      }
+    } catch {
+      /* suite config */
+    }
+  }
+
+  const dir = tournamentDir(id)
+  for (const file of ['config.json', 'meta.json']) {
+    try {
+      const fp = path.join(dir, file)
+      if (!fs.existsSync(fp)) continue
+      merge(JSON.parse(fs.readFileSync(fp, 'utf8')) as PartialMeta, out)
+      if (out.format && out.playerCount !== undefined && out.maxRounds !== undefined) {
+        return out
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  return out
+}
+
 function clearLiveJsonIfTournament(tournamentId: string) {
   try {
     if (!fs.existsSync(LIVE_JSON)) return
@@ -318,9 +385,7 @@ function handlePersist(
     'utf8',
   )
 
-  const gitOnResultOnly =
-    body.triggerGit === true && body.event?.type === 'RESULT_SET'
-  if (gitOnResultOnly) {
+  if (process.env.ENABLE_TOURNAMENT_GIT_SYNC === '1') {
     try {
       runGitSync(id)
     } catch (e) {
@@ -382,7 +447,8 @@ export function tournamentServerPlugin(): Plugin {
                 }
               }
               const name = readTournamentDisplayName(id)
-              return { id, name, updatedAt }
+              const meta = readTournamentListMetadata(id)
+              return { id, name, updatedAt, ...meta }
             })
             tournaments.sort((a, b) => {
               const ta = a.updatedAt ? Date.parse(a.updatedAt) : 0
@@ -509,6 +575,17 @@ export function tournamentServerPlugin(): Plugin {
               ),
               'utf8',
             )
+            if (process.env.ENABLE_TOURNAMENT_GIT_SYNC === '1') {
+              try {
+                runGitSync(body.tournamentId)
+              } catch (e) {
+                json(res, 500, {
+                  error: 'git_failed',
+                  message: String(e),
+                })
+                return
+              }
+            }
             json(res, 200, { ok: true })
             return
           }

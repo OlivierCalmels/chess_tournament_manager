@@ -26,7 +26,7 @@ jobs:
       - name: Build (spectateur)
         env:
           VITE_PUBLIC_STATE_URL: ${{ vars.VITE_PUBLIC_STATE_URL }}
-          VITE_PUBLIC_POLL_INTERVAL_MS: '15000'
+          VITE_PUBLIC_POLL_INTERVAL_MS: ${{ vars.VITE_PUBLIC_POLL_INTERVAL_MS || '4000' }}
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
         run: npm run build:spectateur
       - uses: actions/upload-pages-artifact@v3
