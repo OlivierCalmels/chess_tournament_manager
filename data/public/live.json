@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T16:25:07.529Z",
+  "updatedAt": "2026-05-09T16:25:09.378Z",
   "schemaVersion": 3,
   "tournamentId": "t-1778343799657-9nnaia",
   "tournamentName": "samedi 9 mai 2026 à 18:23",
@@ -207,7 +207,7 @@
         {
           "playerAId": "e16d3a77-d6e9-4138-bc42-3b7170a56de4",
           "playerBId": "75396d9d-00e5-47ed-a6c6-d8fbb4bdbaec",
-          "result": null,
+          "result": "B",
           "elim": {
             "kind": "bronze",
             "key": "bronze-0",
@@ -220,7 +220,7 @@
         {
           "playerAId": "51cdf8e0-7b30-48e5-a6c8-b8219915868d",
           "playerBId": "c7926a09-b934-47b0-b36f-4bbb8cb0c439",
-          "result": null,
+          "result": "B",
           "elim": {
             "kind": "placement",
             "key": "pl-m0-W1-0",
