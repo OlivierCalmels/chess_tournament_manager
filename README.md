@@ -131,6 +131,7 @@ Avec `VITE_PUBLIC_STATE_URL` définie au build : pas d’API locale, pas d’éc
 
 | Problème | Piste |
 |----------|--------|
+| **404** en ouvrant `/…/tournaments/leaderboard` (ou F5 sur une sous-route) | Normal sur un hébergement statique sans réécriture URL. Le build produit **`404.html`** = copie de **`index.html`** pour que **GitHub Pages** charge quand même la SPA (voir plugin Vite `spa-github-pages-404-fallback`). Redéploie après mise à jour du build. |
 | Page blanche ou assets 404 | Vérifier que **`VITE_BASE_PATH`** correspond au préfixe du site (`/mon-repo/`). |
 | « Chargement… » sans fin | **`VITE_PUBLIC_STATE_URL`** absente au build, JSON inaccessible (404), ou JSON sans `tournamentId` / `players` valides. |
 | Données qui ne bougent pas | Cache côté hôte raw ; vérifier que le push touche bien la **branche** utilisée dans l’URL du JSON. |
