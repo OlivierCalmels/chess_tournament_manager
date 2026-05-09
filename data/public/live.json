@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T16:03:29.346Z",
+  "updatedAt": "2026-05-09T16:03:33.062Z",
   "schemaVersion": 3,
   "tournamentId": "t-1778342608247-i4i3ch",
   "tournamentName": "samedi 9 mai 2026 à 18:03",
@@ -66,7 +66,7 @@
         {
           "playerAId": "2eaca5bd-d5bf-4c75-bb93-3c9f57894d32",
           "playerBId": "aaab0bfe-3e5f-4966-85b4-719e107d7893",
-          "result": null,
+          "result": "A",
           "elim": {
             "kind": "main",
             "key": "main-0-0",
@@ -128,5 +128,6 @@
     }
   ],
   "activeRoundIndex": 1,
-  "finished": false
+  "finished": false,
+  "eliminationLegacy": false
 }
