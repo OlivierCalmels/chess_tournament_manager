@@ -4,8 +4,11 @@ import {
   layoutEliminationBracketByColumns,
   partitionEliminationBracketVisuals,
   placementVisualColumnIndex,
+  withCupBracketDisplayPlaceholders,
+  withMainCupPlaceholders,
   type BracketMatchVisual,
 } from './eliminationBracketGraph'
+import { mainMatchKey } from './eliminationPairing'
 import type { Player, TournamentState } from './types'
 
 function p(id: string, elo: number): Player {
@@ -154,6 +157,66 @@ describe('partitionEliminationBracketVisuals & layout coupe (schéma 3)', () => 
     ]
     expect(colAvg[0]).toBeLessThan(colAvg[1]!)
     expect(colAvg[1]).toBeLessThan(colAvg[2]!)
+  })
+
+  it('withMainCupPlaceholders : coupe 8 — QF présents, demi-finale + finale ajoutés', () => {
+    const qf = [0, 1, 2, 3].map((slot) =>
+      baseVisual(mainMatchKey(0, slot), {
+        elimKind: 'main',
+        mainDepth: 0,
+        mainSlot: slot,
+        playerAId: 'p1',
+        playerBId: 'p2',
+      }),
+    )
+    const merged = withMainCupPlaceholders(qf, 8)
+    const mains = merged.filter((m) => m.elimKind === 'main')
+    expect(mains).toHaveLength(7)
+    expect(merged.find((m) => m.key === mainMatchKey(1, 0))).toBeDefined()
+    expect(merged.find((m) => m.key === mainMatchKey(1, 1))).toBeDefined()
+    expect(merged.find((m) => m.key === mainMatchKey(2, 0))).toBeDefined()
+  })
+
+  it('withCupBracketDisplayPlaceholders : ajoute bronze si absent (8 joueurs)', () => {
+    const qf = [0, 1, 2, 3].map((slot) =>
+      baseVisual(mainMatchKey(0, slot), {
+        elimKind: 'main',
+        mainDepth: 0,
+        mainSlot: slot,
+        playerAId: 'a',
+        playerBId: 'b',
+      }),
+    )
+    const merged = withCupBracketDisplayPlaceholders(qf, 8)
+    expect(merged.some((m) => m.elimKind === 'bronze')).toBe(true)
+    const br = merged.find((m) => m.elimKind === 'bronze')
+    expect(br?.incomingKeys?.[0]).toBe(mainMatchKey(1, 0))
+    expect(br?.incomingKeys?.[1]).toBe(mainMatchKey(1, 1))
+  })
+
+  it('columnOrder réservées : même matchs, svgW reflète déjà tout le tableau', () => {
+    const sole = baseVisual('main-0-only', {
+      elimKind: 'main',
+      mainDepth: 0,
+      mainSlot: 0,
+      roundIndex: 1,
+    })
+    const baseOpts = {
+      columnOf: (m: BracketMatchVisual) => m.mainDepth ?? 0,
+      rowKey: (m: BracketMatchVisual) => m.mainSlot ?? 0,
+      columnLabel: (d: number) => `d=${d}`,
+    }
+    const { svgW: wColsSeules } = layoutEliminationBracketByColumns(
+      [sole],
+      3,
+      baseOpts,
+    )
+    const { svgW: wCoupeComplète } = layoutEliminationBracketByColumns(
+      [sole],
+      3,
+      { ...baseOpts, columnOrder: [0, 1, 2] },
+    )
+    expect(wCoupeComplète).toBeGreaterThan(wColsSeules)
   })
 
   it('placementVisualColumnIndex : t0 puis W/L par étage', () => {

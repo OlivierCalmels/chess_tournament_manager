@@ -1,9 +1,11 @@
 import {
   bracketSize,
+  bronzeMatchKey,
   eliminationIsLegacyState,
   eliminationMatchTitleFr,
   eliminationPairingWinnerLoser,
   eliminationPhaseLabelFr,
+  mainMatchKey,
 } from './eliminationPairing'
 import { pairingIsResolved } from './scoring'
 import type { EliminationPairingMeta, TournamentState } from './types'
@@ -149,6 +151,95 @@ export function eliminationBracketMatches(
   return visuals
 }
 
+/** Nom affiché pour les lignes encore sans joueurs (coupe bronze fictifs). */
+export const CUP_BRACKET_DISPLAY_PLACEHOLDER = '—'
+
+/**
+ * Complète la liste des matchs coupe principale (`main-{d}-{s}`) pour tout le tableau
+ * (demi-finale, finale, …), même avant que les persistances existent dans l’état.
+ */
+export function withMainCupPlaceholders(
+  visuals: BracketMatchVisual[],
+  playerCount: number,
+): BracketMatchVisual[] {
+  const b = bracketSize(playerCount)
+  const lb = Math.round(Math.log2(b))
+  const maxD = Math.max(0, lb - 1)
+
+  const rest = visuals.filter((v) => v.elimKind !== 'main')
+
+  const byKey = new Map(
+    visuals
+      .filter((v) => v.elimKind === 'main')
+      .map((m) => [m.key, m] as const),
+  )
+
+  const added: BracketMatchVisual[] = []
+  for (let d = 0; d <= maxD; d++) {
+    const nSlots = 2 ** (maxD - d)
+    for (let s = 0; s < nSlots; s++) {
+      const key = mainMatchKey(d, s)
+      if (byKey.has(key)) continue
+      added.push({
+        key,
+        roundIndex: 0,
+        slotIndex: s,
+        playerAId: CUP_BRACKET_DISPLAY_PLACEHOLDER,
+        playerBId: CUP_BRACKET_DISPLAY_PLACEHOLDER,
+        incomingKeys:
+          d === 0 ?
+            [null, null]
+          : [mainMatchKey(d - 1, s * 2), mainMatchKey(d - 1, s * 2 + 1)],
+        winnerId: null,
+        loserId: null,
+        resolved: false,
+        phaseShort: '',
+        elimKind: 'main',
+        mainDepth: d,
+        mainSlot: s,
+      })
+    }
+  }
+
+  return [...rest, ...byKey.values(), ...added]
+}
+
+/** Profondeur des demi-finales (feeder du bronze). */
+function semiDepthFromBracketSize(b: number): number {
+  const lb = Math.round(Math.log2(b))
+  return lb - 2
+}
+
+/**
+ * Coupe complète comme `withMainCupPlaceholders`, plus une case **petite finale**
+ * (bronze) fictive reliée aux demi-finales, si le format la prévoit.
+ */
+export function withCupBracketDisplayPlaceholders(
+  visuals: BracketMatchVisual[],
+  playerCount: number,
+): BracketMatchVisual[] {
+  const merged = withMainCupPlaceholders(visuals, playerCount)
+  const b = bracketSize(playerCount)
+  const sd = semiDepthFromBracketSize(b)
+  if (sd >= 0 && !merged.some((v) => v.elimKind === 'bronze')) {
+    const bronze: BracketMatchVisual = {
+      key: bronzeMatchKey(),
+      roundIndex: 0,
+      slotIndex: 0,
+      playerAId: CUP_BRACKET_DISPLAY_PLACEHOLDER,
+      playerBId: CUP_BRACKET_DISPLAY_PLACEHOLDER,
+      incomingKeys: [mainMatchKey(sd, 0), mainMatchKey(sd, 1)],
+      winnerId: null,
+      loserId: null,
+      resolved: false,
+      phaseShort: '',
+      elimKind: 'bronze',
+    }
+    return [...merged, bronze]
+  }
+  return merged
+}
+
 /** Indices de colonne gauche→droite pour les matchs placement d’une même cohorte. */
 export function placementVisualColumnIndex(m: BracketMatchVisual): number {
   const d = m.placementDepth ?? 0
@@ -209,6 +300,12 @@ export type LayoutBracketOpts = {
   rowStep?: number
   boxW?: number
   boxH?: number
+  /**
+   * Indices de colonnes gauche→droite (coupe complète, rondes legacy, etc.).
+   * Remplit les colonnes vides pour garder une largeur SVG stable = échelle des cases inchangée
+   * quand de nouvelles phases apparaissent.
+   */
+  columnOrder?: number[]
   /** Colonne physique gauche→droite (ex. roundIndex legacy, ou mainDepth pour la coupe). */
   columnOf: (m: BracketMatchVisual) => number
   /** Tri vertical dans une colonne. */
@@ -242,9 +339,22 @@ export function layoutEliminationBracketByColumns(
   const boxH = opts.boxH ?? 52
   const rowOf = opts.rowKey ?? ((m) => m.slotIndex)
 
-  const columnOrder = [...new Set(matches.map((m) => opts.columnOf(m)))].sort(
-    (a, b) => a - b,
-  )
+  const colsFromMatches = [
+    ...new Set(matches.map((m) => opts.columnOf(m))),
+  ].sort((a, b) => a - b)
+
+  /** Colonnes explicites + toute colonne où il existe encore un match (robustesse). */
+  let columnOrder: number[]
+  if (opts.columnOrder?.length) {
+    columnOrder = [...opts.columnOrder]
+    for (const c of colsFromMatches) {
+      if (!columnOrder.includes(c)) columnOrder.push(c)
+    }
+    columnOrder.sort((a, b) => a - b)
+  } else {
+    columnOrder = colsFromMatches
+  }
+
   const byCol = new Map<number, BracketMatchVisual[]>()
   for (const ck of columnOrder) {
     byCol.set(
@@ -255,7 +365,7 @@ export function layoutEliminationBracketByColumns(
     )
   }
   const counts = columnOrder.map((r) => byCol.get(r)!.length)
-  const gridRows = counts.length ? Math.max(...counts) : 0
+  const gridRows = counts.length ? Math.max(0, ...counts) : 0
   const totalH =
     gridRows <= 0
       ? 120
@@ -283,13 +393,16 @@ export function layoutEliminationBracketByColumns(
     })
   })
 
-  const columnPhases: LayoutBracketColumnHeader[] = columnOrder.map((ck) => {
-    const sample = laid.find((x) => opts.columnOf(x) === ck)
-    const xCenter =
-      sample ? sample.layout.lx + sample.layout.boxW / 2 : 0
-    const label = opts.columnLabel?.(ck) ?? sample?.phaseShort ?? ''
-    return { columnKey: ck, label, xCenter }
-  })
+  const columnPhases: LayoutBracketColumnHeader[] = columnOrder.map(
+    (ck, ci) => {
+      const sample = laid.find((x) => opts.columnOf(x) === ck)
+      const xCenter = sample ?
+          sample.layout.lx + sample.layout.boxW / 2
+        : px0 + ci * pxPerCol + boxW / 2
+      const label = opts.columnLabel?.(ck) ?? sample?.phaseShort ?? ''
+      return { columnKey: ck, label, xCenter }
+    },
+  )
 
   const svgW = px0 + columnOrder.length * pxPerCol + colGap
   const svgH = totalH
@@ -300,7 +413,14 @@ export function layoutEliminationBracketByColumns(
 export function layoutEliminationBracket(
   matches: BracketMatchVisual[],
   maxRounds: number,
-  opts?: { colGap?: number; rowStep?: number; boxW?: number; boxH?: number },
+  opts?: {
+    colGap?: number
+    rowStep?: number
+    boxW?: number
+    boxH?: number
+    /** Rondes 1 … maxRondes même si aucun match encore. */
+    columnOrder?: number[]
+  },
 ): {
   laid: BracketMatchLaidOut[]
   svgW: number

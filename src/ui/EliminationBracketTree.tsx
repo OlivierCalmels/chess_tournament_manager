@@ -6,11 +6,13 @@ import {
   cohortMainDepthsForPlacement,
 } from '../domain/eliminationPairing'
 import {
+  CUP_BRACKET_DISPLAY_PLACEHOLDER,
   eliminationBracketMatches,
   layoutEliminationBracket,
   layoutEliminationBracketByColumns,
   orthogonalConnector,
   partitionEliminationBracketVisuals,
+  withCupBracketDisplayPlaceholders,
   type BracketMatchLaidOut,
   type BracketMatchVisual,
   type LayoutBracketColumnHeader,
@@ -27,6 +29,12 @@ type Props = {
 
 function playerName(state: TournamentState, id: string): string {
   return state.players.find((p) => p.id === id)?.name ?? id
+}
+
+function bracketNameClass(id: string): string {
+  return id === CUP_BRACKET_DISPLAY_PLACEHOLDER ?
+      'text-zinc-400'
+    : ''
 }
 
 function laidEdgesFrom(
@@ -112,12 +120,13 @@ function useEliminationBracketPhoneLayout(): boolean {
   return compact
 }
 
-function phoneLayoutBracketOpts(
-  compact: boolean,
+/** Cases compactes : taille cible comme en fin de tableau (voir columnOrder coupe / legacy). */
+function bracketPanelLayoutDims(
+  compactPhone: boolean,
 ): Pick<LayoutBracketOpts, 'colGap' | 'rowStep' | 'boxW' | 'boxH'> {
-  return compact ?
-      { boxW: 158, boxH: 62, rowStep: 68, colGap: 20 }
-    : {}
+  return compactPhone ?
+      { boxW: 86, boxH: 25, rowStep: 30, colGap: 7 }
+    : { boxW: 92, boxH: 27, rowStep: 32, colGap: 8 }
 }
 
 function BracketPanelSvg(props: {
@@ -144,7 +153,7 @@ function BracketPanelSvg(props: {
   if (laid.length === 0) return null
 
   return (
-    <div className="-mx-4 w-[calc(100%+2rem)] min-w-0 max-w-none touch-pan-x overflow-x-auto pb-2 sm:mx-0 sm:w-full lg:touch-auto lg:overflow-x-visible">
+    <div className="-mx-4 w-[calc(100%+2rem)] min-w-0 touch-pan-x overflow-x-auto pb-2 sm:mx-auto sm:w-full sm:max-w-xl lg:touch-auto lg:overflow-x-visible">
       <svg
         viewBox={`0 0 ${svgW} ${svgH}`}
         width="100%"
@@ -158,9 +167,9 @@ function BracketPanelSvg(props: {
           <text
             key={`hdr-${col.columnKey}`}
             x={col.xCenter}
-            y={18}
+            y={15}
             textAnchor="middle"
-            className="fill-zinc-500 text-[11px] font-medium uppercase tracking-wide sm:text-[10px]"
+            className="fill-zinc-500 text-[9px] font-medium uppercase tracking-wide sm:text-[8px]"
           >
             {col.label}
           </text>
@@ -192,14 +201,23 @@ function BracketPanelSvg(props: {
             : ''
           const matchResolvedCls =
             m.resolved && hasB ? 'stroke-emerald-400/50' : ''
+          const inset = Math.max(3, Math.round(boxW * 0.036))
+          const midY = ly + boxH / 2
+          const gapLine = Math.max(2, Math.round(boxH * 0.06))
+          const foTopY = ly + 2
+          const foTopH = Math.max(9, Math.round(midY - foTopY - gapLine))
+          const foBotY = Math.round(midY + gapLine / 2)
+          const foBotH = Math.max(9, Math.round(ly + boxH - foBotY - 2))
+          const rx = Math.min(4, Math.max(2, Math.floor(boxH / 10)))
+
           const nameLine = (won: boolean, lost: boolean) => {
             if (won) {
-              return 'truncate rounded px-0.5 text-[13px] font-semibold leading-tight text-emerald-950 ring-1 ring-emerald-500/35 sm:text-[11px] sm:ring-0'
+              return 'truncate rounded px-0.5 text-[10px] font-semibold leading-tight text-emerald-950 ring-1 ring-emerald-400/30 sm:text-[9px] sm:ring-0'
             }
             if (lost) {
-              return 'truncate text-[13px] font-normal leading-tight text-zinc-500 opacity-80 sm:text-[11px]'
+              return 'truncate text-[10px] font-normal leading-tight text-zinc-500 opacity-85 sm:text-[9px]'
             }
-            return 'truncate text-[13px] font-medium leading-tight text-zinc-900 sm:text-[11px]'
+            return 'truncate text-[10px] font-medium leading-tight text-zinc-900 sm:text-[9px]'
           }
           return (
             <g key={m.key}>
@@ -208,48 +226,52 @@ function BracketPanelSvg(props: {
                 y={ly}
                 width={boxW}
                 height={boxH}
-                rx={6}
+                rx={rx}
                 className={`fill-white stroke-[1px] stroke-zinc-300 ${byeCls} ${matchResolvedCls}`}
               />
               <foreignObject
-                x={lx + 6}
-                y={ly + 3}
-                width={boxW - 12}
-                height={22}
+                x={lx + inset}
+                y={foTopY}
+                width={boxW - 2 * inset}
+                height={foTopH}
               >
-                <div className={nameLine(wonA, loserA)}>
+                <div
+                  className={`${nameLine(wonA, loserA)} flex h-full items-center ${bracketNameClass(m.playerAId)}`}
+                >
                   {playerName(state, m.playerAId)}
                 </div>
               </foreignObject>
               {m.playerBId ?
                 <>
                   <line
-                    x1={lx + 8}
-                    y1={ly + boxH / 2}
-                    x2={lx + boxW - 8}
-                    y2={ly + boxH / 2}
+                    x1={lx + inset}
+                    y1={midY}
+                    x2={lx + boxW - inset}
+                    y2={midY}
                     stroke="#e4e4e7"
                     strokeWidth={1}
                   />
                   <foreignObject
-                    x={lx + 6}
-                    y={ly + boxH / 2 + 2}
-                    width={boxW - 12}
-                    height={22}
+                    x={lx + inset}
+                    y={foBotY}
+                    width={boxW - 2 * inset}
+                    height={foBotH}
                   >
-                    <div className={nameLine(wonB, loserB)}>
+                    <div
+                      className={`${nameLine(wonB, loserB)} flex h-full items-center ${bracketNameClass(m.playerBId!)}`}
+                    >
                       {playerName(state, m.playerBId)}
                     </div>
                   </foreignObject>
                 </>
               : (
                 <foreignObject
-                  x={lx + 6}
-                  y={ly + 24}
-                  width={boxW - 12}
-                  height={20}
+                  x={lx + inset}
+                  y={ly + Math.round(boxH * 0.32)}
+                  width={boxW - 2 * inset}
+                  height={Math.max(12, Math.round(boxH * 0.45))}
                 >
-                  <div className="text-[12px] italic leading-tight text-zinc-500 sm:text-[10px]">
+                  <div className="text-[9px] italic leading-tight text-zinc-500 sm:text-[8px]">
                     exempt
                   </div>
                 </foreignObject>
@@ -267,6 +289,7 @@ function layoutPanelMatches(
   subset: BracketMatchVisual[],
   layoutOpts: Pick<
     LayoutBracketOpts,
+    | 'columnOrder'
     | 'columnOf'
     | 'rowKey'
     | 'columnLabel'
@@ -300,7 +323,7 @@ function layoutPanelMatches(
 export function EliminationBracketTree({ state }: Props) {
   const elimPhoneLayout = useEliminationBracketPhoneLayout()
   const layoutDim = useMemo(
-    () => phoneLayoutBracketOpts(elimPhoneLayout),
+    () => bracketPanelLayoutDims(elimPhoneLayout),
     [elimPhoneLayout],
   )
 
@@ -313,10 +336,14 @@ export function EliminationBracketTree({ state }: Props) {
     const matches = eliminationBracketMatches(state)
     if (matches.length === 0) return null
 
+    const maxR = Math.max(1, state.maxRounds)
     const { laid, svgW, svgH, columnPhases } = layoutEliminationBracket(
       matches,
-      Math.max(1, state.maxRounds),
-      layoutDim,
+      maxR,
+      {
+        ...layoutDim,
+        columnOrder: Array.from({ length: maxR }, (_, i) => i + 1),
+      },
     )
     const { edges } = laidEdgesFrom(laid, 'midpoint')
     return { laid, edges, svgW, svgH, columnPhases }
@@ -331,14 +358,20 @@ export function EliminationBracketTree({ state }: Props) {
     const b = bracketSize(n)
     const maxMainDepth = Math.max(0, Math.round(Math.log2(b)) - 1)
 
+    const matchesForBracket = withCupBracketDisplayPlaceholders(matches, n)
+
     const { main, bronze, placementsByCohort } =
-      partitionEliminationBracketVisuals(matches)
+      partitionEliminationBracketVisuals(matchesForBracket)
 
     const mainLayout =
       main.length === 0
         ? null
         : layoutPanelMatches(state, main, {
             ...layoutDim,
+            columnOrder: Array.from(
+              { length: maxMainDepth + 1 },
+              (_, d) => d,
+            ),
             columnOf: (m) =>
               typeof m.mainDepth === 'number' ? m.mainDepth : 0,
             rowKey: (m) => m.mainSlot ?? m.slotIndex,
