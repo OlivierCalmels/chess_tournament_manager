@@ -1,9 +1,158 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, 'Times New Roman', serif;
+
+  --color-salon-wood-deep: oklch(0.26 0.04 52);
+  --color-salon-wood-mid: oklch(0.34 0.05 54);
+  --color-salon-wood-light: oklch(0.42 0.06 55);
+  --color-salon-parchment: oklch(0.96 0.02 95);
+  --color-salon-parchment-mid: oklch(0.91 0.03 92);
+  --color-salon-ink: oklch(0.28 0.02 55);
+  --color-salon-cream: oklch(0.97 0.015 88);
 }
 
 body {
   @apply bg-zinc-50 text-zinc-900 antialiased;
+}
+
+/* Page classement « salon » : bois, feutre, cadre jeu d’échecs discret — mobile first */
+.salon-shell {
+  @apply relative min-h-dvh font-sans text-salon-ink;
+  background-color: oklch(0.21 0.035 52);
+  background-image:
+    linear-gradient(
+      180deg,
+      oklch(0.95 0.01 95 / 0.05) 0%,
+      transparent 38%
+    ),
+    repeating-linear-gradient(
+      105deg,
+      oklch(0.24 0.03 50) 0px,
+      oklch(0.22 0.032 48) 1px,
+      oklch(0.26 0.036 54) 2px,
+      oklch(0.23 0.03 50) 4px
+    ),
+    linear-gradient(
+      145deg,
+      oklch(0.28 0.045 55) 0%,
+      oklch(0.2 0.03 48) 42%,
+      oklch(0.24 0.038 52) 100%
+    );
+  box-shadow: inset 0 0 120px oklch(0.12 0.02 40 / 0.45);
+}
+
+.salon-shell::before {
+  content: '';
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+.salon-header {
+  position: relative;
+  border-bottom: 1px solid oklch(0.35 0.05 50 / 0.45);
+  background: linear-gradient(
+    180deg,
+    oklch(0.32 0.045 52 / 0.55) 0%,
+    oklch(0.22 0.03 48 / 0.35) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 oklch(0.98 0.01 95 / 0.08),
+    0 6px 24px oklch(0.1 0.02 40 / 0.35);
+}
+
+/* Motif échiquier très discret en haut du bandeau */
+.salon-header-chess {
+  background-image: linear-gradient(
+      90deg,
+      oklch(0.95 0.01 95 / 0.04) 25%,
+      transparent 25%,
+      transparent 50%,
+      oklch(0.95 0.01 95 / 0.04) 50%,
+      oklch(0.95 0.01 95 / 0.04) 75%,
+      transparent 75%,
+      transparent
+    ),
+    linear-gradient(
+      oklch(0.95 0.01 95 / 0.04) 25%,
+      transparent 25%,
+      transparent 50%,
+      oklch(0.95 0.01 95 / 0.04) 50%,
+      oklch(0.95 0.01 95 / 0.04) 75%,
+      transparent 75%,
+      transparent
+    );
+  background-size: 14px 14px;
+}
+
+.salon-main {
+  @apply relative;
+  background: radial-gradient(
+      ellipse 120% 80% at 50% -20%,
+      oklch(0.98 0.02 95 / 0.45),
+      transparent 55%
+    ),
+    linear-gradient(
+      180deg,
+      oklch(0.96 0.025 94) 0%,
+      oklch(0.92 0.035 92) 100%
+    );
+  box-shadow: inset 0 1px 0 oklch(0.99 0.01 100 / 0.7);
+}
+
+.salon-board-card {
+  border-radius: 1rem;
+  border-width: 2px;
+  border-style: solid;
+  border-color: oklch(0.55 0.07 55 / 0.45);
+  background: linear-gradient(
+    165deg,
+    oklch(0.99 0.01 95) 0%,
+    oklch(0.96 0.02 92) 45%,
+    oklch(0.94 0.025 90) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.55),
+    0 2px 0 oklch(0.4 0.05 52 / 0.12),
+    0 12px 36px oklch(0.22 0.035 48 / 0.18);
+}
+
+.salon-muted {
+  border-radius: 0.75rem;
+  border: 1px solid oklch(0.45 0.05 54 / 0.25);
+  background: oklch(0.94 0.02 92 / 0.75);
+}
+
+/* Surclasse styles Table pour le tableau de scores */
+.salon-score-table thead th {
+  background-color: oklch(0.38 0.055 50) !important;
+  color: oklch(0.96 0.025 92) !important;
+  border-bottom-color: oklch(0.33 0.05 48) !important;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.salon-score-table tbody td {
+  border-bottom-color: oklch(0.82 0.04 88 / 0.65) !important;
+}
+
+.salon-score-table tbody tr:hover td {
+  background-color: oklch(0.97 0.02 93 / 0.9);
+}
+
+.salon-score-table tbody tr[data-salon-place='1'] td {
+  background-color: oklch(0.93 0.07 86 / 0.92) !important;
+}
+
+.salon-score-table tbody tr[data-salon-place='2'] td {
+  background-color: oklch(0.91 0.02 88 / 0.88) !important;
+}
+
+.salon-score-table tbody tr[data-salon-place='3'] td {
+  background-color: oklch(0.9 0.05 72 / 0.86) !important;
 }
