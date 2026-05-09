@@ -1,10 +1,9 @@
 {
-  "updatedAt": "2026-05-09T17:23:20.162Z",
-  "schemaVersion": 3,
   "tournamentId": "t-1778347400158-yyb80e",
   "tournamentName": "samedi 9 mai 2026 à 19:23",
   "maxRounds": 4,
   "format": "swiss",
+  "playerCount": 8,
   "createdAt": "2026-05-09T17:23:20.158Z",
   "players": [
     {
@@ -47,35 +46,5 @@
       "name": "Paul W.",
       "elo": 400
     }
-  ],
-  "rounds": [
-    {
-      "roundIndex": 1,
-      "pairings": [
-        {
-          "playerAId": "c653f8cd-788b-405d-ba08-da849991a3d1",
-          "playerBId": "d1c54263-09b0-4328-82bb-737e67d6cab5",
-          "result": null
-        },
-        {
-          "playerAId": "adf1b3a3-500f-4240-a464-6b150e611e99",
-          "playerBId": "6b4550de-ef07-4173-aaa6-ee71a19b3901",
-          "result": null
-        },
-        {
-          "playerAId": "60f1757a-2f25-4898-b85d-3ce4bdfaa85c",
-          "playerBId": "f1bed370-e69d-4c32-bfdf-d25d9f057be2",
-          "result": null
-        },
-        {
-          "playerAId": "284faa10-08b0-4f14-930c-7f54ce934613",
-          "playerBId": "4f7fbcc1-b029-4066-920b-c0fb82434c1f",
-          "result": null
-        }
-      ],
-      "completed": false
-    }
-  ],
-  "activeRoundIndex": 1,
-  "finished": false
+  ]
 }
