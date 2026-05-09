@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T16:24:47.575Z",
+  "updatedAt": "2026-05-09T16:24:49.440Z",
   "schemaVersion": 3,
   "tournamentId": "t-1778343799657-9nnaia",
   "tournamentName": "samedi 9 mai 2026 à 18:23",
@@ -111,7 +111,7 @@
         {
           "playerAId": "134c8d0f-dd16-4b65-a899-290e0fb5b158",
           "playerBId": "5a3626c5-9830-47ba-98a8-13d66915bbe8",
-          "result": null,
+          "result": "A",
           "elim": {
             "kind": "main",
             "key": "main-0-2",
