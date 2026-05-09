@@ -151,7 +151,7 @@ function BracketPanelSvg(props: {
   const nameLineClasses = (won: boolean, lost: boolean) => {
     if (tone === 'salon') {
       if (won) {
-        return 'truncate rounded px-0.5 text-[13px] font-semibold leading-tight text-[#123524] ring-1 ring-[#6b9473]/50 sm:text-[11px]'
+        return 'truncate rounded bg-[#e4efe5]/95 px-0.5 text-[13px] font-semibold leading-tight text-[#123524] ring-1 ring-[#6b9473]/50 sm:text-[11px]'
       }
       if (lost) {
         return 'truncate text-[13px] font-normal leading-tight text-[#7d6f62] opacity-88 sm:text-[11px]'
