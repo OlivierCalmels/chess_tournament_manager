@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   bracketSize,
   eliminationIsLegacyState,
@@ -11,14 +11,15 @@ import {
   layoutEliminationBracketByColumns,
   orthogonalConnector,
   partitionEliminationBracketVisuals,
-  placementVisualColumnIndex,
   type BracketMatchLaidOut,
   type BracketMatchVisual,
   type LayoutBracketColumnHeader,
+  type LayoutBracketOpts,
   type OrthogonalConnectorStyle,
 } from '../domain/eliminationBracketGraph'
 import type { TournamentState } from '../domain/types'
 import { Card } from './Card'
+import { PlacementBracketDuelCards } from './PlacementBracketDuelCards'
 
 type Props = {
   state: TournamentState
@@ -95,6 +96,29 @@ function laidEdgesFrom(
   return { edges: edgeList }
 }
 
+function useEliminationBracketPhoneLayout(): boolean {
+  const [compact, setCompact] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia('(max-width: 639px)').matches
+  })
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)')
+    const onChange = () => setCompact(mq.matches)
+    onChange()
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+  return compact
+}
+
+function phoneLayoutBracketOpts(
+  compact: boolean,
+): Pick<LayoutBracketOpts, 'colGap' | 'rowStep' | 'boxW' | 'boxH'> {
+  return compact ?
+      { boxW: 158, boxH: 62, rowStep: 68, colGap: 20 }
+    : {}
+}
+
 function BracketPanelSvg(props: {
   state: TournamentState
   ariaLabel: string
@@ -119,7 +143,7 @@ function BracketPanelSvg(props: {
   if (laid.length === 0) return null
 
   return (
-    <div className="w-full overflow-x-auto pb-1">
+    <div className="-mx-4 w-[calc(100%+2rem)] max-w-none touch-pan-x overflow-x-auto pb-2 sm:mx-0 sm:w-full sm:max-w-full">
       <svg
         width={svgW}
         height={svgH}
@@ -134,7 +158,7 @@ function BracketPanelSvg(props: {
             x={col.xCenter}
             y={18}
             textAnchor="middle"
-            className="fill-zinc-500 text-[10px] font-medium uppercase tracking-wide"
+            className="fill-zinc-500 text-[11px] font-medium uppercase tracking-wide sm:text-[10px]"
           >
             {col.label}
           </text>
@@ -151,12 +175,30 @@ function BracketPanelSvg(props: {
         ))}
         {laid.map((m) => {
           const { lx, ly, boxW, boxH } = m.layout
+          const hasB = m.playerBId !== null
           const wonA = Boolean(m.resolved && m.winnerId === m.playerAId)
           const wonB = Boolean(m.resolved && m.winnerId === m.playerBId)
+          const loserA = Boolean(
+            m.resolved && hasB && m.winnerId && m.playerAId !== m.winnerId,
+          )
+          const loserB = Boolean(
+            m.resolved && hasB && m.winnerId && m.playerBId !== m.winnerId,
+          )
           const byeCls =
             m.playerBId === null ?
               'stroke-amber-200/80 fill-amber-50/40'
             : ''
+          const matchResolvedCls =
+            m.resolved && hasB ? 'stroke-emerald-400/50' : ''
+          const nameLine = (won: boolean, lost: boolean) => {
+            if (won) {
+              return 'truncate rounded px-0.5 text-[13px] font-semibold leading-tight text-emerald-950 ring-1 ring-emerald-500/35 sm:text-[11px] sm:ring-0'
+            }
+            if (lost) {
+              return 'truncate text-[13px] font-normal leading-tight text-zinc-500 opacity-80 sm:text-[11px]'
+            }
+            return 'truncate text-[13px] font-medium leading-tight text-zinc-900 sm:text-[11px]'
+          }
           return (
             <g key={m.key}>
               <rect
@@ -165,17 +207,15 @@ function BracketPanelSvg(props: {
                 width={boxW}
                 height={boxH}
                 rx={6}
-                className={`fill-white stroke-[1px] stroke-zinc-300 ${byeCls}`}
+                className={`fill-white stroke-[1px] stroke-zinc-300 ${byeCls} ${matchResolvedCls}`}
               />
               <foreignObject
                 x={lx + 6}
-                y={ly + 4}
+                y={ly + 3}
                 width={boxW - 12}
-                height={18}
+                height={22}
               >
-                <div
-                  className={`truncate text-[11px] leading-tight ${wonA ? 'font-semibold text-emerald-800' : 'text-zinc-800'}`}
-                >
+                <div className={nameLine(wonA, loserA)}>
                   {playerName(state, m.playerAId)}
                 </div>
               </foreignObject>
@@ -191,13 +231,11 @@ function BracketPanelSvg(props: {
                   />
                   <foreignObject
                     x={lx + 6}
-                    y={ly + boxH / 2 + 3}
+                    y={ly + boxH / 2 + 2}
                     width={boxW - 12}
-                    height={18}
+                    height={22}
                   >
-                    <div
-                      className={`truncate text-[11px] leading-tight ${wonB ? 'font-semibold text-emerald-800' : 'text-zinc-800'}`}
-                    >
+                    <div className={nameLine(wonB, loserB)}>
                       {playerName(state, m.playerBId)}
                     </div>
                   </foreignObject>
@@ -205,11 +243,11 @@ function BracketPanelSvg(props: {
               : (
                 <foreignObject
                   x={lx + 6}
-                  y={ly + 22}
+                  y={ly + 24}
                   width={boxW - 12}
-                  height={18}
+                  height={20}
                 >
-                  <div className="text-[10px] italic leading-tight text-zinc-500">
+                  <div className="text-[12px] italic leading-tight text-zinc-500 sm:text-[10px]">
                     exempt
                   </div>
                 </foreignObject>
@@ -225,11 +263,16 @@ function BracketPanelSvg(props: {
 function layoutPanelMatches(
   state: TournamentState,
   subset: BracketMatchVisual[],
-  layoutOpts: {
-    columnOf: (m: BracketMatchVisual) => number
-    rowKey?: (m: BracketMatchVisual) => number
-    columnLabel?: (colKey: number) => string
-  },
+  layoutOpts: Pick<
+    LayoutBracketOpts,
+    | 'columnOf'
+    | 'rowKey'
+    | 'columnLabel'
+    | 'colGap'
+    | 'rowStep'
+    | 'boxW'
+    | 'boxH'
+  >,
   connectorStyle: OrthogonalConnectorStyle,
 ): {
   laid: BracketMatchLaidOut[]
@@ -253,6 +296,12 @@ function layoutPanelMatches(
 
 /** Tableau coupe v3 : panneaux par sous-tournoi ; legacy : une seule vue par ronde. */
 export function EliminationBracketTree({ state }: Props) {
+  const elimPhoneLayout = useEliminationBracketPhoneLayout()
+  const layoutDim = useMemo(
+    () => phoneLayoutBracketOpts(elimPhoneLayout),
+    [elimPhoneLayout],
+  )
+
   const useLegacyElimLayout =
     eliminationIsLegacyState(state) ||
     (state.format ?? 'swiss') !== 'elimination'
@@ -265,10 +314,11 @@ export function EliminationBracketTree({ state }: Props) {
     const { laid, svgW, svgH, columnPhases } = layoutEliminationBracket(
       matches,
       Math.max(1, state.maxRounds),
+      layoutDim,
     )
     const { edges } = laidEdgesFrom(laid, 'midpoint')
     return { laid, edges, svgW, svgH, columnPhases }
-  }, [state, useLegacyElimLayout])
+  }, [state, useLegacyElimLayout, layoutDim])
 
   const v3Panels = useMemo(() => {
     if (useLegacyElimLayout) return null
@@ -286,6 +336,7 @@ export function EliminationBracketTree({ state }: Props) {
       main.length === 0
         ? null
         : layoutPanelMatches(state, main, {
+            ...layoutDim,
             columnOf: (m) =>
               typeof m.mainDepth === 'number' ? m.mainDepth : 0,
             rowKey: (m) => m.mainSlot ?? m.slotIndex,
@@ -297,6 +348,7 @@ export function EliminationBracketTree({ state }: Props) {
       bronze.length === 0
         ? null
         : layoutPanelMatches(state, bronze, {
+            ...layoutDim,
             columnOf: () => 0,
             columnLabel: () => 'Petite finale',
           }, 'midpoint')
@@ -311,27 +363,25 @@ export function EliminationBracketTree({ state }: Props) {
       .sort((a, b) => a - b)
     const allCohortKeys = [...cohortOrder, ...extraCohort]
 
-    const placementLayouts = allCohortKeys.map((dm) => {
-      const cohort = placementsByCohort.get(dm) ?? []
-      const phaseFr = eliminationPhaseLabelFr(dm + 1, maxMainDepth + 1)
-      return {
-        cohortKey: dm,
-        title: `Mini-tableau — perdants ${phaseFr.toLowerCase()}`,
-        layout: layoutPanelMatches(state, cohort, {
-          columnOf: placementVisualColumnIndex,
-          rowKey: (m) => m.placementSlot ?? m.slotIndex,
-          columnLabel: (col) =>
-            col === 0 ? 'Tour 1' : col % 2 === 0 ? 'Vainqueurs' : 'Perdants',
-        }, 'nearParent'),
-      }
-    }).filter((p) => p.layout && p.layout!.laid.length > 0)
+    const placementLayouts = allCohortKeys
+      .map((dm) => {
+        const cohort = placementsByCohort.get(dm) ?? []
+        const phaseFr = eliminationPhaseLabelFr(dm + 1, maxMainDepth + 1)
+        return {
+          cohortKey: dm,
+          title: `Mini-tableau — perdants ${phaseFr.toLowerCase()}`,
+          cohort,
+          phaseFr,
+        }
+      })
+      .filter((p) => p.cohort.length > 0)
 
     return {
       mainLayout,
       bronzeLayout,
       placementLayouts,
     }
-  }, [state, useLegacyElimLayout])
+  }, [state, useLegacyElimLayout, layoutDim])
 
   if (useLegacyElimLayout) {
     if (!legacyPanel?.laid.length) return null
@@ -379,7 +429,7 @@ export function EliminationBracketTree({ state }: Props) {
     })
   }
   for (const row of v3Panels?.placementLayouts ?? []) {
-    if (!row.layout?.laid.length) continue
+    if (!row.cohort.length) continue
     navSections.push({
       id: `lb-elim-placement-${row.cohortKey}`,
       label: row.title,
@@ -389,13 +439,13 @@ export function EliminationBracketTree({ state }: Props) {
   return (
     <div className="mb-6">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <p className="text-xs font-medium text-zinc-600">
+        <p className="text-xs font-medium leading-snug text-zinc-600">
           Vues tableau : coupe, petite finale et mini-tableaux (classement
           synthétique plus bas).
         </p>
         {navSections.length > 1 ?
           <nav
-            className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs"
+            className="flex flex-wrap items-start gap-x-3 gap-y-2 text-xs leading-snug sm:items-center sm:gap-x-4 sm:text-xs"
             aria-label="Aller aux vues du tableau à élimination"
           >
             {navSections.map(({ id, label }, i) => (
@@ -416,13 +466,13 @@ export function EliminationBracketTree({ state }: Props) {
           </nav>
         : null}
       </div>
-      <div className="flex flex-wrap items-start gap-4">
+      <div className="flex flex-col items-stretch gap-6 lg:flex-row lg:flex-wrap lg:items-start">
         {v3Panels?.mainLayout?.laid.length ?
           <section
             id="lb-elim-main"
-            className="scroll-mt-20 min-w-[min(100%,320px)] shrink-0 grow-0"
+            className="scroll-mt-20 w-full min-w-0 shrink-0 lg:min-w-[min(100%,280px)] lg:max-w-min lg:grow lg:basis-[min(100%,560px)]"
           >
-            <Card title="Coupe principale">
+            <Card title="Coupe principale" titleClassName="text-base lg:text-lg">
               <BracketPanelSvg
                 state={state}
                 ariaLabel="Coupe principale"
@@ -439,9 +489,12 @@ export function EliminationBracketTree({ state }: Props) {
         {v3Panels?.bronzeLayout?.laid.length ?
           <section
             id="lb-elim-bronze"
-            className="scroll-mt-20 min-w-[min(100%,260px)] shrink-0 grow-0"
+            className="scroll-mt-20 w-full min-w-0 shrink-0 lg:min-w-[min(100%,260px)] lg:grow lg:basis-80"
           >
-            <Card title="Petite finale — 3ᵉ place">
+            <Card
+              title="Petite finale — 3ᵉ place"
+              titleClassName="text-base lg:text-lg"
+            >
               <BracketPanelSvg
                 state={state}
                 ariaLabel="Petite finale"
@@ -455,24 +508,18 @@ export function EliminationBracketTree({ state }: Props) {
             </Card>
           </section>
         : null}
-        {v3Panels?.placementLayouts?.map(({ cohortKey, title, layout }) => {
-          if (!layout?.laid.length) return null
+        {v3Panels?.placementLayouts?.map(({ cohortKey, title, cohort, phaseFr }) => {
           return (
             <section
               key={`pl-${cohortKey}`}
               id={`lb-elim-placement-${cohortKey}`}
-              className="scroll-mt-20 min-w-[min(100%,300px)] shrink-0 grow-0"
+              className="scroll-mt-20 w-full min-w-0 shrink-0 lg:min-w-[min(100%,280px)] lg:grow lg:basis-96"
             >
-              <Card title={title}>
-                <BracketPanelSvg
+              <Card title={title} titleClassName="text-base lg:text-lg">
+                <PlacementBracketDuelCards
                   state={state}
-                  ariaLabel={title}
-                  svgTitle={title}
-                  laid={layout.laid}
-                  edges={layout.edges}
-                  svgW={layout.svgW}
-                  svgH={layout.svgH}
-                  columnPhases={layout.columnPhases}
+                  cohort={cohort}
+                  lostAtRoundLabel={phaseFr}
                 />
               </Card>
             </section>
@@ -480,9 +527,7 @@ export function EliminationBracketTree({ state }: Props) {
         })}
       </div>
       <p className="mt-3 max-w-4xl text-xs leading-snug text-zinc-500">
-        La coupe utilise les colonnes quart / demi / finale (suivant le nombre de
-        participants). Les lignes relient deux matchs quand leur vainqueurs ou
-        perdants s’affrontent au tour suivant dans le même sous-tableau.
+        Sur la coupe, les lignes relient deux matchs quand leurs vainqueurs ou leurs perdants se retrouvent au tour suivant. Les perdants hors podium jouent ensuite des duels présentés en cartes (un duel = une carte) dans les mini-tableaux.
       </p>
     </div>
   )

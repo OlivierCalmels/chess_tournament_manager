@@ -16,7 +16,9 @@ export function PageLayout({
               Tournoi suisse
             </p>
             {title ? (
-              <h1 className="text-xl font-semibold text-zinc-900">{title}</h1>
+              <h1 className="break-words text-lg font-semibold leading-snug text-zinc-900 sm:text-xl">
+                {title}
+              </h1>
             ) : null}
           </div>
         </div>

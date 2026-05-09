@@ -110,35 +110,58 @@ export function hasPlayed(
   return false
 }
 
+/** Variante d’affichage pour colorer les cellules du classement. */
+export type LeaderboardRoundCellVariant =
+  | 'win'
+  | 'loss'
+  | 'draw'
+  | 'bye'
+  | 'pending'
+  | 'neutral'
+
+export function roundCellMetaForPlayer(
+  round: RoundState | undefined,
+  playerId: string,
+  format: TournamentFormat = 'swiss',
+): { text: string; variant: LeaderboardRoundCellVariant } {
+  if (!round) return { text: '—', variant: 'neutral' }
+  const pairing = round.pairings.find(
+    (p) =>
+      p.playerAId === playerId ||
+      (p.playerBId !== null && p.playerBId === playerId),
+  )
+  if (!pairing) return { text: '—', variant: 'neutral' }
+  if (pairing.playerBId === null && pairing.playerAId === playerId) {
+    return round.completed ?
+        { text: '1 (bye)', variant: 'win' }
+      : { text: 'bye', variant: 'bye' }
+  }
+  if (pairing.result === null) return { text: '—', variant: 'pending' }
+  const isA = pairing.playerAId === playerId
+  if (pairing.result === 'draw') {
+    if (format === 'swiss') return { text: '½', variant: 'draw' }
+    if (pairing.tieBreakResult === 'A' || pairing.tieBreakResult === 'B') {
+      const wonTb =
+        (pairing.tieBreakResult === 'A' && isA) ||
+        (pairing.tieBreakResult === 'B' && !isA)
+      return wonTb ?
+          { text: '½→1 (TB)', variant: 'win' }
+        : { text: '½→0 (TB)', variant: 'loss' }
+    }
+    return { text: '½ (TB?)', variant: 'draw' }
+  }
+  if (pairing.result === 'A')
+    return isA ? { text: '1', variant: 'win' } : { text: '0', variant: 'loss' }
+  if (pairing.result === 'B')
+    return isA ? { text: '0', variant: 'loss' } : { text: '1', variant: 'win' }
+  return { text: '—', variant: 'neutral' }
+}
+
 /** Cell for leaderboard: points earned that round, or label for bye / future */
 export function roundCellForPlayer(
   round: RoundState | undefined,
   playerId: string,
   format: TournamentFormat = 'swiss',
 ): string {
-  if (!round) return '—'
-  const pairing = round.pairings.find(
-    (p) =>
-      p.playerAId === playerId ||
-      (p.playerBId !== null && p.playerBId === playerId),
-  )
-  if (!pairing) return '—'
-  if (pairing.playerBId === null && pairing.playerAId === playerId) {
-    return round.completed ? '1 (bye)' : 'bye'
-  }
-  if (pairing.result === null) return '—'
-  const isA = pairing.playerAId === playerId
-  if (pairing.result === 'draw') {
-    if (format === 'swiss') return '½'
-    if (pairing.tieBreakResult === 'A' || pairing.tieBreakResult === 'B') {
-      const wonTb =
-        (pairing.tieBreakResult === 'A' && isA) ||
-        (pairing.tieBreakResult === 'B' && !isA)
-      return wonTb ? '½→1 (TB)' : '½→0 (TB)'
-    }
-    return '½ (TB?)'
-  }
-  if (pairing.result === 'A') return isA ? '1' : '0'
-  if (pairing.result === 'B') return isA ? '0' : '1'
-  return '—'
+  return roundCellMetaForPlayer(round, playerId, format).text
 }
