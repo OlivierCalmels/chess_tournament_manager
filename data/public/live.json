@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T15:29:51.832Z",
+  "updatedAt": "2026-05-09T15:29:53.701Z",
   "schemaVersion": 2,
   "tournamentId": "t-1778340516649-sani0k",
   "tournamentName": "samedi 9 mai 2026 à 17:28",
@@ -136,9 +136,9 @@
           "result": "A"
         }
       ],
-      "completed": false
+      "completed": true
     }
   ],
   "activeRoundIndex": 3,
-  "finished": false
+  "finished": true
 }
