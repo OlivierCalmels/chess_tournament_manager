@@ -1,0 +1,61 @@
+{
+  "tournamentId": "t-1778343798774-onep7h",
+  "tournamentName": "samedi 9 mai 2026 à 18:23",
+  "maxRounds": 3,
+  "format": "elimination",
+  "playerCount": 8,
+  "elimFirstRound": "elo",
+  "eliminationRound1Order": [
+    "0201da83-6617-4094-9acf-49f3b100a72c",
+    "3e3ba70e-012a-4c4b-9c19-3345b40f18e5",
+    "505de2d9-8cda-4e25-a5b2-4585c53054c9",
+    "7392d7b3-4688-48bb-9d97-029baeb6dde6",
+    "9325031b-9fe7-4f31-bfcf-ff2e711bfa1a",
+    "b621d3ed-bb9a-41de-a327-81b24149ee2d",
+    "5178b409-2f48-444c-a1bb-fc1936f7d8c4",
+    "cd6cdd11-73de-4f97-b787-dfa81ea5e0b3"
+  ],
+  "createdAt": "2026-05-09T16:23:18.774Z",
+  "players": [
+    {
+      "id": "0201da83-6617-4094-9acf-49f3b100a72c",
+      "name": "Adel",
+      "elo": 700
+    },
+    {
+      "id": "3e3ba70e-012a-4c4b-9c19-3345b40f18e5",
+      "name": "Johann",
+      "elo": 660
+    },
+    {
+      "id": "505de2d9-8cda-4e25-a5b2-4585c53054c9",
+      "name": "Olivier",
+      "elo": 610
+    },
+    {
+      "id": "7392d7b3-4688-48bb-9d97-029baeb6dde6",
+      "name": "Adrian",
+      "elo": 600
+    },
+    {
+      "id": "9325031b-9fe7-4f31-bfcf-ff2e711bfa1a",
+      "name": "Hamza",
+      "elo": 550
+    },
+    {
+      "id": "b621d3ed-bb9a-41de-a327-81b24149ee2d",
+      "name": "Hedi",
+      "elo": 550
+    },
+    {
+      "id": "5178b409-2f48-444c-a1bb-fc1936f7d8c4",
+      "name": "Paul L.",
+      "elo": 400
+    },
+    {
+      "id": "cd6cdd11-73de-4f97-b787-dfa81ea5e0b3",
+      "name": "Paul W.",
+      "elo": 400
+    }
+  ]
+}
