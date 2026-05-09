@@ -20,6 +20,9 @@ const TOURNAMENTS_DIR = path.join(DATA_ROOT, 'tournaments')
 const PUBLIC_DIR = path.join(DATA_ROOT, 'public')
 const LIVE_JSON = path.join(PUBLIC_DIR, 'live.json')
 
+/** GET + CORS : spectateur Vite (autre port) peut poller `live.json` sur le serveur orga. */
+const DEV_LIVE_STATE_PATH = '/dev/live-state.json'
+
 const ID_RE = /^[a-zA-Z0-9_-]{1,64}$/
 
 /** Évite d’interpréter les routes réservées comme un id de tournoi. */
@@ -405,6 +408,45 @@ export function tournamentServerPlugin(): Plugin {
     name: 'tournament-server',
     configureServer(server) {
       ensureDirs()
+
+      server.middlewares.use((req, res, next) => {
+        if (!req.url) {
+          next()
+          return
+        }
+        try {
+          const url = new URL(req.url, 'http://localhost')
+          if (
+            req.method === 'OPTIONS' &&
+            url.pathname === DEV_LIVE_STATE_PATH
+          ) {
+            res.statusCode = 204
+            res.setHeader('Access-Control-Allow-Origin', '*')
+            res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
+            res.setHeader('Access-Control-Max-Age', '86400')
+            res.end()
+            return
+          }
+          if (
+            req.method === 'GET' &&
+            url.pathname === DEV_LIVE_STATE_PATH
+          ) {
+            if (!fs.existsSync(LIVE_JSON)) {
+              json(res, 404, { error: 'not_found' })
+              return
+            }
+            const raw = fs.readFileSync(LIVE_JSON, 'utf8')
+            res.statusCode = 200
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.setHeader('Access-Control-Allow-Origin', '*')
+            res.end(raw)
+            return
+          }
+        } catch {
+          /* fall through */
+        }
+        next()
+      })
 
       server.middlewares.use(
         async (req, res, next) => {

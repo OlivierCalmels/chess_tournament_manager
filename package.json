@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:sync": "ENABLE_TOURNAMENT_GIT_SYNC=1 vite",
+    "dev:sync:orga": "ENABLE_TOURNAMENT_GIT_SYNC=1 vite --port 5173 --strictPort",
+    "dev:sync:spectateur": "VITE_PUBLIC_STATE_URL=http://127.0.0.1:5173/dev/live-state.json VITE_BASE_PATH=/ vite --mode spectateur --port 5174 --strictPort",
+    "dev:sync": "concurrently -k -n orga,spect \"npm run dev:sync:orga\" \"npm run dev:sync:spectateur\"",
     "build": "tsc -b && vite build",
     "build:spectateur": "tsc -b && vite build --mode spectateur",
     "tournament:push": "node scripts/tournament-push.mjs",
@@ -25,6 +27,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.2.1",
     "eslint": "^10.2.1",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",

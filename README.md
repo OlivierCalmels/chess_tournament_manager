@@ -1,5 +1,27 @@
 # Tournoi d’échecs (local + suivi web)
 
+## npm run dev:sync
+
+C’est la façon prévue pour travailler **comme au club** : interface organisateur avec **push Git automatique** après chaque enregistrement, **et** fenêtre spectateur qui lit `data/public/live.json` en direct.
+
+```bash
+npm install
+npm run dev:sync
+```
+
+Tu obtiens **deux** serveurs Vite (les navigateurs ouvrent en général **deux onglets** automatiquement) :
+
+| Serveur | URL | Rôle |
+|--------|-----|------|
+| **Organisateur + sync** | [http://localhost:5173](http://localhost:5173) | App complète, API locale sous `/api/tournament/…`. `ENABLE_TOURNAMENT_GIT_SYNC=1` : après chaque persistance (et à la création d’un tournoi), **`git add` / commit / push** sur `data/tournaments/<id>` et **`data/public/live.json`**. |
+| **Spectateur (dev)** | [http://localhost:5174](http://localhost:5174) | Build en mode spectateur uniquement lecture : polling du JSON sur **`http://127.0.0.1:5173/dev/live-state.json`** (route dev avec CORS, contenu équivalent au fichier `live.json`). |
+
+Prérequis côté machine : dépôt **git** configuré avec un **`git push`** fonctionnel (identité, PAT ou SSH selon ton environnement). Sans cela, le serveur organisateur peut échouer au moment du sync après une action.
+
+Sans double fenêtre ou sans poussées automatiques, utilise **`npm run dev`** (une seule app sur le port par défaut) — voir [Développement (organisateur)](#développement-organisateur).
+
+---
+
 ## Déroulé technique (récap)
 
 | Élément | Statut |
@@ -14,6 +36,10 @@
 | **UI** + pages Setup / Rounds / Leaderboard + router | Implémenté |
 
 ## Développement (organisateur)
+
+Pour le flux complet (orga + spectateur + push auto), préfère [**`npm run dev:sync`**](#npm-run-devsync) en haut de ce fichier.
+
+Développement **minimal** (une seule instance, pas de push Git intégré au middleware) :
 
 ```bash
 npm install
@@ -39,7 +65,7 @@ Fichier public **`data/public/live.json`** : dernier état servi aux spectateurs
 - `DELETE /api/tournament/:id` — supprime le dossier du tournoi ; si c’était le tournoi publié dans `live.json`, le fichier public est vidé (timestamp seul).
 
 - Écriture des fichiers via le middleware Vite.
-- Optionnel : commits / push automatiques **après chaque persistance locale** et **après création de tournoi** (pour pousser `live.json` vers la forge tout de suite, utile avec le spectateur Pages) :
+- Optionnel : commits / push automatiques **après chaque persistance locale** et **après création de tournoi** (pour pousser `live.json` vers la forge tout de suite, utile avec le spectateur Pages). C’est ce que fait déjà **`npm run dev:sync`** ; à la main, équivalent :
 
 ```bash
 ENABLE_TOURNAMENT_GIT_SYNC=1 npm run dev
@@ -80,7 +106,7 @@ Dans les **variables CI** du dépôt :
 1. Nom : **`VITE_PUBLIC_STATE_URL`**
 2. Valeur : URL complète vers `live.json` après mise en ligne du dépôt ; forme commune sur les forges courantes : **`https://<hôte>/<propriétaire>/<dépôt>/raw/<branche>/data/public/live.json`** (adapté à ton arborescence exacte).
 
-   Ce fichier doit **exister** sur la **branche** indiquée (ex. `main`) après tes pushes (généré en local avec `npm run dev` + tournoi, ou copié par ton automatisation).
+   Ce fichier doit **exister** sur la **branche** indiquée (ex. `main`) après tes pushes (généré en local avec `npm run dev` / **`npm run dev:sync`** + tournoi, ou copié par ton automatisation).
 
 > Le workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) injecte cette valeur via **`vars.VITE_PUBLIC_STATE_URL`**. Si elle est absente, le build peut réussir mais le site spectateur n’aura **aucune** URL de données.
 
@@ -117,7 +143,7 @@ Ouvre l’URL indiquée par Vite ; pour un site sous préfixe, utilise le chemin
 
 ### 6. Mettre à jour les données visibles par les spectateurs
 
-1. Depuis la machine du club : `npm run dev`, enregistrement des résultats → `data/public/live.json` mis à jour.
+1. Depuis la machine du club : **`npm run dev:sync`** (ou `npm run dev`), enregistrement des résultats → `data/public/live.json` mis à jour.
 2. **Commit + push** de `data/public/live.json` (et du reste si besoin) sur la branche référencée dans **`VITE_PUBLIC_STATE_URL`**.
 3. Les spectateurs reçoivent les changements au prochain **polling** (défaut **4 s** dans le workflow CI si la variable n’est pas définie ; voir § 4 bis ; en local, voir `.env.spectateur`).
 
