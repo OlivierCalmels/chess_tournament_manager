@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T15:29:25.479Z",
+  "updatedAt": "2026-05-09T15:29:27.025Z",
   "schemaVersion": 2,
   "tournamentId": "t-1778340516649-sani0k",
   "tournamentName": "samedi 9 mai 2026 à 17:28",
@@ -84,9 +84,35 @@
           "result": "B"
         }
       ],
+      "completed": true
+    },
+    {
+      "roundIndex": 2,
+      "pairings": [
+        {
+          "playerAId": "f9b7c8fe-2376-43e4-92dc-932557d8c834",
+          "playerBId": "4a562127-5522-4d2e-823f-9ee7744782b9",
+          "result": null
+        },
+        {
+          "playerAId": "3aacb220-3611-4a6f-826d-f9df1d6263b3",
+          "playerBId": "7f633c1a-62ac-41ba-a812-d6fd5afe4803",
+          "result": null
+        },
+        {
+          "playerAId": "7c5dbc54-684c-4f9b-a4f5-866334d341ce",
+          "playerBId": "2af0b1e4-e1f6-4598-91ef-03619f75692e",
+          "result": null
+        },
+        {
+          "playerAId": "d8bfcda0-6b5d-41d1-ac10-352f92b5191e",
+          "playerBId": "94e827bb-c90a-4328-9471-2138a13ad01e",
+          "result": null
+        }
+      ],
       "completed": false
     }
   ],
-  "activeRoundIndex": 1,
+  "activeRoundIndex": 2,
   "finished": false
 }
