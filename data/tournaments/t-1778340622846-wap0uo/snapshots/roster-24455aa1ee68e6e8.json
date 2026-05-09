@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-05-09T15:30:22.851Z",
-  "schemaVersion": 2,
   "tournamentId": "t-1778340622846-wap0uo",
   "tournamentName": "samedi 9 mai 2026 à 17:30",
   "maxRounds": 3,
@@ -58,35 +56,5 @@
       "name": "Paul W.",
       "elo": 400
     }
-  ],
-  "rounds": [
-    {
-      "roundIndex": 1,
-      "pairings": [
-        {
-          "playerAId": "54e35786-8d7f-4bac-b3d6-c26079556b3f",
-          "playerBId": "4856be4e-51a8-418e-8d91-00806962a459",
-          "result": null
-        },
-        {
-          "playerAId": "cee424e3-8f0a-40b4-8bda-a7aa30c9f7d3",
-          "playerBId": "9b5b8272-dd93-4002-8f3a-776395fa8c17",
-          "result": null
-        },
-        {
-          "playerAId": "92e1768b-f7f7-4207-b438-30ee096c23fe",
-          "playerBId": "af4f14b9-3cc2-47fb-b446-181a47c64685",
-          "result": null
-        },
-        {
-          "playerAId": "bf29e892-f54b-4754-8572-0019a4e5f9a7",
-          "playerBId": "f3097120-4ae7-44a2-963b-80f5f2da0f89",
-          "result": null
-        }
-      ],
-      "completed": false
-    }
-  ],
-  "activeRoundIndex": 1,
-  "finished": false
+  ]
 }
