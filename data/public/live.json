@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T16:12:19.479Z",
+  "updatedAt": "2026-05-09T16:12:21.532Z",
   "schemaVersion": 3,
   "tournamentId": "t-1778343091520-0x5wif",
   "tournamentName": "samedi 9 mai 2026 à 18:11",
@@ -184,10 +184,78 @@
           }
         }
       ],
+      "completed": true
+    },
+    {
+      "roundIndex": 3,
+      "pairings": [
+        {
+          "playerAId": "84a9b840-4993-45e4-9d33-c7d6d39fd450",
+          "playerBId": "916c44f3-db5f-46e2-a8f9-18dd398ff268",
+          "result": null,
+          "elim": {
+            "kind": "main",
+            "key": "main-2-0",
+            "mainDepth": 2,
+            "mainSlot": 0,
+            "connectFrom": [
+              "main-1-0",
+              "main-1-1"
+            ]
+          }
+        },
+        {
+          "playerAId": "2b14cfa6-36e8-4259-ac14-3620f0337084",
+          "playerBId": "aa229cb1-d4f6-4f91-bafd-27826fbbbf5e",
+          "result": null,
+          "elim": {
+            "kind": "bronze",
+            "key": "bronze-0",
+            "connectFrom": [
+              "main-1-0",
+              "main-1-1"
+            ]
+          }
+        },
+        {
+          "playerAId": "53e0cd8d-754c-49d6-ab19-53881103c8e8",
+          "playerBId": "654b6ed9-3d2c-43a7-be19-d13fcdad5624",
+          "result": null,
+          "elim": {
+            "kind": "placement",
+            "key": "pl-m0-W1-0",
+            "cohortMainDepth": 0,
+            "placementDepth": 1,
+            "placementSlot": 0,
+            "placementLane": "W",
+            "connectFrom": [
+              "pl-m0-t0-s0",
+              "pl-m0-t0-s1"
+            ]
+          }
+        },
+        {
+          "playerAId": "085e98d1-04be-41ea-a683-7bbba5998b1e",
+          "playerBId": "a4816120-b29a-4e8a-9e39-95c65fb6aea3",
+          "result": null,
+          "elim": {
+            "kind": "placement",
+            "key": "pl-m0-L1-0",
+            "cohortMainDepth": 0,
+            "placementDepth": 1,
+            "placementSlot": 0,
+            "placementLane": "L",
+            "connectFrom": [
+              "pl-m0-t0-s0",
+              "pl-m0-t0-s1"
+            ]
+          }
+        }
+      ],
       "completed": false
     }
   ],
-  "activeRoundIndex": 2,
+  "activeRoundIndex": 3,
   "finished": false,
   "eliminationLegacy": false
 }
