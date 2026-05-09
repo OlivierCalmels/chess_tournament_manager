@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:sync:orga": "ENABLE_TOURNAMENT_GIT_SYNC=1 vite --port 5173 --strictPort",
-    "dev:sync:spectateur": "VITE_PUBLIC_STATE_URL=http://127.0.0.1:5173/dev/live-state.json VITE_BASE_PATH=/ vite --mode spectateur --port 5174 --strictPort",
-    "dev:sync": "concurrently -k -n orga,spect \"npm run dev:sync:orga\" \"npm run dev:sync:spectateur\"",
+    "dev:sync:orga": "DEV_SYNC=1 ENABLE_TOURNAMENT_GIT_SYNC=1 vite --port 5173 --strictPort",
+    "dev:sync:spectateur": "DEV_SYNC=1 VITE_PUBLIC_STATE_URL=http://127.0.0.1:5173/dev/live-state.json VITE_BASE_PATH=/ vite --mode spectateur --port 5174 --strictPort",
+    "dev:sync:open": "node scripts/openDevSyncExternal.mjs",
+    "dev:sync": "concurrently --kill-others-on-fail -n orga,spect,pages \"npm run dev:sync:orga\" \"npm run dev:sync:spectateur\" \"npm run dev:sync:open\"",
     "build": "tsc -b && vite build",
     "build:spectateur": "tsc -b && vite build --mode spectateur",
     "tournament:push": "node scripts/tournament-push.mjs",

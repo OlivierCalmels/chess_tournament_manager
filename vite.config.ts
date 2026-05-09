@@ -43,7 +43,8 @@ export default defineConfig(({ mode }) => {
     ],
     base: process.env.VITE_BASE_PATH ?? '/',
     server: {
-      open: true,
+      /** `npm run dev:sync` ouvre GitHub Actions + Pages ; pas les onglets localhost. */
+      open: process.env.DEV_SYNC !== '1',
     },
   }
 })

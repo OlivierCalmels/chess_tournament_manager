@@ -9,7 +9,11 @@ npm install
 npm run dev:sync
 ```
 
-Tu obtiens **deux** serveurs Vite (les navigateurs ouvrent en général **deux onglets** automatiquement) :
+Au lancement, le navigateur ouvre **trois onglets** : les [**Actions** du dépôt](https://github.com/OlivierCalmels/chess_tournament_manager/actions), le [**classement du site spectateur Pages**](https://oliviercalmels.github.io/chess_tournament_manager/tournaments/leaderboard), puis après une courte pause l’[**app organisateur locale** sur le port 5173](http://localhost:5173/) (pour laisser Vite démarrer).
+
+Le petit script qui ouvre les onglets du navigateur se termine vite ; **`concurrently`** laisse tout de même tourner les deux serveurs Vite jusqu’à **Ctrl+C** dans ce terminal.
+
+En parallèle, **deux** serveurs Vite tournent en local :
 
 | Serveur | URL | Rôle |
 |--------|-----|------|
