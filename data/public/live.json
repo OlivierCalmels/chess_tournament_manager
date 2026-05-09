@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T17:35:29.996Z",
+  "updatedAt": "2026-05-09T17:35:31.954Z",
   "schemaVersion": 3,
   "tournamentId": "t-1778347523008-s87mm0",
   "tournamentName": "samedi 9 mai 2026 à 19:25",
@@ -252,10 +252,10 @@
           }
         }
       ],
-      "completed": false
+      "completed": true
     }
   ],
   "activeRoundIndex": 3,
-  "finished": false,
+  "finished": true,
   "eliminationLegacy": false
 }
