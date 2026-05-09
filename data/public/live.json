@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T15:27:52.823Z",
+  "updatedAt": "2026-05-09T15:27:54.394Z",
   "schemaVersion": 2,
   "tournamentId": "t-1778340170289-gh45e1",
   "tournamentName": "samedi 9 mai 2026 à 17:22",
@@ -151,10 +151,10 @@
           "result": "B"
         }
       ],
-      "completed": false
+      "completed": true
     }
   ],
   "activeRoundIndex": 4,
-  "finished": false,
+  "finished": true,
   "elimFirstRound": "elo"
 }
