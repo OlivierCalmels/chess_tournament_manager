@@ -96,6 +96,7 @@ function laidEdgesFrom(
   return { edges: edgeList }
 }
 
+/** Mobile : mise en page plus compacte dans le système de coordonnées du SVG (avant scale). */
 function useEliminationBracketPhoneLayout(): boolean {
   const [compact, setCompact] = useState(() => {
     if (typeof window === 'undefined') return false
@@ -143,11 +144,12 @@ function BracketPanelSvg(props: {
   if (laid.length === 0) return null
 
   return (
-    <div className="-mx-4 w-[calc(100%+2rem)] max-w-none touch-pan-x overflow-x-auto pb-2 sm:mx-0 sm:w-full sm:max-w-full">
+    <div className="-mx-4 w-[calc(100%+2rem)] min-w-0 max-w-none touch-pan-x overflow-x-auto pb-2 sm:mx-0 sm:w-full lg:touch-auto lg:overflow-x-visible">
       <svg
-        width={svgW}
-        height={svgH}
-        className="min-w-0 shrink-0 text-zinc-900"
+        viewBox={`0 0 ${svgW} ${svgH}`}
+        width="100%"
+        preserveAspectRatio="xMidYMin meet"
+        className="block h-auto w-full min-w-0 max-w-full touch-pan-x text-zinc-900 lg:touch-auto"
         role="img"
         aria-label={ariaLabel}
       >
@@ -437,7 +439,7 @@ export function EliminationBracketTree({ state }: Props) {
   }
 
   return (
-    <div className="mb-6">
+    <div className="mb-6 w-full min-w-0 max-w-full">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <p className="text-xs font-medium leading-snug text-zinc-600">
           Vues tableau : coupe, petite finale et mini-tableaux (classement
@@ -466,11 +468,11 @@ export function EliminationBracketTree({ state }: Props) {
           </nav>
         : null}
       </div>
-      <div className="flex flex-col items-stretch gap-6 lg:flex-row lg:flex-wrap lg:items-start">
+      <div className="flex flex-col items-stretch gap-6">
         {v3Panels?.mainLayout?.laid.length ?
           <section
             id="lb-elim-main"
-            className="scroll-mt-20 w-full min-w-0 shrink-0 lg:min-w-[min(100%,280px)] lg:max-w-min lg:grow lg:basis-[min(100%,560px)]"
+            className="scroll-mt-20 w-full max-w-full min-w-0 shrink-0"
           >
             <Card title="Coupe principale" titleClassName="text-base lg:text-lg">
               <BracketPanelSvg
@@ -489,7 +491,7 @@ export function EliminationBracketTree({ state }: Props) {
         {v3Panels?.bronzeLayout?.laid.length ?
           <section
             id="lb-elim-bronze"
-            className="scroll-mt-20 w-full min-w-0 shrink-0 lg:min-w-[min(100%,260px)] lg:grow lg:basis-80"
+            className="scroll-mt-20 w-full max-w-full min-w-0 shrink-0"
           >
             <Card
               title="Petite finale — 3ᵉ place"
@@ -513,7 +515,7 @@ export function EliminationBracketTree({ state }: Props) {
             <section
               key={`pl-${cohortKey}`}
               id={`lb-elim-placement-${cohortKey}`}
-              className="scroll-mt-20 w-full min-w-0 shrink-0 lg:min-w-[min(100%,280px)] lg:grow lg:basis-96"
+              className="scroll-mt-20 w-full max-w-full min-w-0 shrink-0"
             >
               <Card title={title} titleClassName="text-base lg:text-lg">
                 <PlacementBracketDuelCards
