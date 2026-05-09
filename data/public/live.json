@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T16:00:01.247Z",
+  "updatedAt": "2026-05-09T16:00:03.409Z",
   "schemaVersion": 3,
   "tournamentId": "t-1778342363351-yj777e",
   "tournamentName": "samedi 9 mai 2026 à 17:59",
@@ -184,10 +184,93 @@
           }
         }
       ],
+      "completed": true
+    },
+    {
+      "roundIndex": 3,
+      "pairings": [
+        {
+          "playerAId": "83505609-3a69-4f59-aebf-1c379ca52704",
+          "playerBId": "e3d4f9f3-30e4-47b5-a3c9-0579fb17a5cc",
+          "result": null,
+          "elim": {
+            "kind": "main",
+            "key": "main-2-0",
+            "mainDepth": 2,
+            "mainSlot": 0,
+            "connectFrom": [
+              "main-1-0",
+              "main-1-1"
+            ]
+          }
+        },
+        {
+          "playerAId": "83505609-3a69-4f59-aebf-1c379ca52704",
+          "playerBId": "e3d4f9f3-30e4-47b5-a3c9-0579fb17a5cc",
+          "result": null,
+          "elim": {
+            "kind": "main",
+            "key": "main-2-0",
+            "mainDepth": 2,
+            "mainSlot": 0,
+            "connectFrom": [
+              "main-1-0",
+              "main-1-1"
+            ]
+          }
+        },
+        {
+          "playerAId": "dda24429-1514-4f34-ac69-be476163b713",
+          "playerBId": "24cb02ee-6c51-4727-82f6-15eddf76a484",
+          "result": null,
+          "elim": {
+            "kind": "bronze",
+            "key": "bronze-0",
+            "connectFrom": [
+              "main-1-0",
+              "main-1-1"
+            ]
+          }
+        },
+        {
+          "playerAId": "94f9c3a1-d965-4d58-beae-959bb6a82415",
+          "playerBId": "2a383b70-d02e-4e64-bbae-f0b0284354af",
+          "result": null,
+          "elim": {
+            "kind": "placement",
+            "key": "pl-m0-W1-0",
+            "cohortMainDepth": 0,
+            "placementDepth": 1,
+            "placementSlot": 0,
+            "placementLane": "W",
+            "connectFrom": [
+              "pl-m0-t0-s0",
+              "pl-m0-t0-s1"
+            ]
+          }
+        },
+        {
+          "playerAId": "d03d6795-7576-4065-aa22-a417f4bf3b00",
+          "playerBId": "d5d38f1d-35a9-47c8-806d-8cb8a8677dd9",
+          "result": null,
+          "elim": {
+            "kind": "placement",
+            "key": "pl-m0-L1-0",
+            "cohortMainDepth": 0,
+            "placementDepth": 1,
+            "placementSlot": 0,
+            "placementLane": "L",
+            "connectFrom": [
+              "pl-m0-t0-s0",
+              "pl-m0-t0-s1"
+            ]
+          }
+        }
+      ],
       "completed": false
     }
   ],
-  "activeRoundIndex": 2,
+  "activeRoundIndex": 3,
   "finished": false,
   "eliminationLegacy": false
 }
