@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T16:45:26.598Z",
+  "updatedAt": "2026-05-09T16:45:32.840Z",
   "schemaVersion": 3,
   "tournamentId": "t-1778345113118-1hkk9d",
   "tournamentName": "samedi 9 mai 2026 à 18:45",
@@ -125,10 +125,70 @@
           }
         }
       ],
+      "completed": true
+    },
+    {
+      "roundIndex": 2,
+      "pairings": [
+        {
+          "playerAId": "856a2f40-9d42-4516-aa39-90c99de14816",
+          "playerBId": "affea9f2-3047-4188-b51f-687c14a34b48",
+          "result": null,
+          "elim": {
+            "kind": "main",
+            "key": "main-1-0",
+            "mainDepth": 1,
+            "mainSlot": 0,
+            "connectFrom": [
+              "main-0-0",
+              "main-0-1"
+            ]
+          }
+        },
+        {
+          "playerAId": "05170097-c6a5-46e6-9c86-93784034b8e4",
+          "playerBId": "502c0598-be2e-44f5-a9f4-708f4fb4df17",
+          "result": null,
+          "elim": {
+            "kind": "main",
+            "key": "main-1-1",
+            "mainDepth": 1,
+            "mainSlot": 1,
+            "connectFrom": [
+              "main-0-2",
+              "main-0-3"
+            ]
+          }
+        },
+        {
+          "playerAId": "12b16b22-0945-4948-a8ea-7aa46222fa3f",
+          "playerBId": "6ba86d40-61e0-4c86-b1a8-9364d1cc85dc",
+          "result": null,
+          "elim": {
+            "kind": "placement",
+            "key": "pl-m0-t0-s0",
+            "cohortMainDepth": 0,
+            "placementDepth": 0,
+            "placementSlot": 0
+          }
+        },
+        {
+          "playerAId": "8db25e6c-f62d-4e37-a696-2bdfc9e9d4ad",
+          "playerBId": "0fa3d2dc-0c3c-4615-89b8-9e8d63e1248c",
+          "result": null,
+          "elim": {
+            "kind": "placement",
+            "key": "pl-m0-t0-s1",
+            "cohortMainDepth": 0,
+            "placementDepth": 0,
+            "placementSlot": 1
+          }
+        }
+      ],
       "completed": false
     }
   ],
-  "activeRoundIndex": 1,
+  "activeRoundIndex": 2,
   "finished": false,
   "eliminationLegacy": false
 }
