@@ -23,8 +23,6 @@ import { PlacementBracketDuelCards } from './PlacementBracketDuelCards'
 
 type Props = {
   state: TournamentState
-  /** Palette bois / parchemin (page classement). */
-  visualTone?: 'default' | 'salon'
 }
 
 function playerName(state: TournamentState, id: string): string {
@@ -130,7 +128,6 @@ function BracketPanelSvg(props: {
   svgW: number
   svgH: number
   columnPhases: LayoutBracketColumnHeader[]
-  tone?: 'default' | 'salon'
 }) {
   const {
     state,
@@ -141,44 +138,16 @@ function BracketPanelSvg(props: {
     svgW,
     svgH,
     columnPhases,
-    tone = 'default',
   } = props
 
   if (laid.length === 0) return null
 
-  const edgeStroke = tone === 'salon' ? '#9a7f66' : '#a1a1aa'
-
-  const nameLineClasses = (won: boolean, lost: boolean) => {
-    if (tone === 'salon') {
-      if (won) {
-        return 'truncate rounded bg-[#e4efe5]/95 px-0.5 text-[13px] font-semibold leading-tight text-[#123524] ring-1 ring-[#6b9473]/50 sm:text-[11px]'
-      }
-      if (lost) {
-        return 'truncate text-[13px] font-normal leading-tight text-[#7d6f62] opacity-88 sm:text-[11px]'
-      }
-      return 'truncate text-[13px] font-medium leading-tight text-[#262019] sm:text-[11px]'
-    }
-    if (won) {
-      return 'truncate rounded px-0.5 text-[13px] font-semibold leading-tight text-emerald-950 ring-1 ring-emerald-500/35 sm:text-[11px] sm:ring-0'
-    }
-    if (lost) {
-      return 'truncate text-[13px] font-normal leading-tight text-zinc-500 opacity-80 sm:text-[11px]'
-    }
-    return 'truncate text-[13px] font-medium leading-tight text-zinc-900 sm:text-[11px]'
-  }
-
   return (
-    <div
-      className={
-        '-mx-4 max-w-none pb-2 max-sm:w-[calc(100%+2rem)] max-sm:touch-pan-x max-sm:overflow-x-auto sm:mx-0 sm:w-full sm:overflow-x-visible'
-      }
-    >
+    <div className="-mx-4 w-[calc(100%+2rem)] max-w-none touch-pan-x overflow-x-auto pb-2 sm:mx-0 sm:w-full sm:max-w-full">
       <svg
-        viewBox={`0 0 ${svgW} ${svgH}`}
-        width="100%"
-        height="auto"
-        preserveAspectRatio="xMidYMin meet"
-        className="block h-auto min-w-0 max-w-full text-zinc-900 max-sm:min-w-[28rem] sm:min-w-0"
+        width={svgW}
+        height={svgH}
+        className="min-w-0 shrink-0 text-zinc-900"
         role="img"
         aria-label={ariaLabel}
       >
@@ -189,7 +158,7 @@ function BracketPanelSvg(props: {
             x={col.xCenter}
             y={18}
             textAnchor="middle"
-            className={`text-[11px] font-medium uppercase tracking-wide sm:text-[10px] ${tone === 'salon' ? 'fill-[#5c4838]' : 'fill-zinc-500'}`}
+            className="fill-zinc-500 text-[11px] font-medium uppercase tracking-wide sm:text-[10px]"
           >
             {col.label}
           </text>
@@ -199,9 +168,9 @@ function BracketPanelSvg(props: {
             key={e.key}
             d={e.d}
             fill="none"
-            stroke={edgeStroke}
+            stroke="#a1a1aa"
             strokeWidth={1}
-            opacity={tone === 'salon' ? 0.9 : 0.85}
+            opacity={0.85}
           />
         ))}
         {laid.map((m) => {
@@ -217,19 +186,19 @@ function BracketPanelSvg(props: {
           )
           const byeCls =
             m.playerBId === null ?
-              tone === 'salon' ?
-                'stroke-[#c4a574]/90 fill-[#faf3e8]/95'
-              : 'stroke-amber-200/80 fill-amber-50/40'
+              'stroke-amber-200/80 fill-amber-50/40'
             : ''
           const matchResolvedCls =
-            m.resolved && hasB ?
-              tone === 'salon' ? 'stroke-[#6b9473]/55'
-              : 'stroke-emerald-400/50'
-            : ''
-          const shellCls =
-            tone === 'salon' ?
-              'fill-[#fdfaf5] stroke-[1px] stroke-[#c9b298]'
-            : 'fill-white stroke-[1px] stroke-zinc-300'
+            m.resolved && hasB ? 'stroke-emerald-400/50' : ''
+          const nameLine = (won: boolean, lost: boolean) => {
+            if (won) {
+              return 'truncate rounded px-0.5 text-[13px] font-semibold leading-tight text-emerald-950 ring-1 ring-emerald-500/35 sm:text-[11px] sm:ring-0'
+            }
+            if (lost) {
+              return 'truncate text-[13px] font-normal leading-tight text-zinc-500 opacity-80 sm:text-[11px]'
+            }
+            return 'truncate text-[13px] font-medium leading-tight text-zinc-900 sm:text-[11px]'
+          }
           return (
             <g key={m.key}>
               <rect
@@ -238,7 +207,7 @@ function BracketPanelSvg(props: {
                 width={boxW}
                 height={boxH}
                 rx={6}
-                className={`${shellCls} ${byeCls} ${matchResolvedCls}`}
+                className={`fill-white stroke-[1px] stroke-zinc-300 ${byeCls} ${matchResolvedCls}`}
               />
               <foreignObject
                 x={lx + 6}
@@ -246,7 +215,7 @@ function BracketPanelSvg(props: {
                 width={boxW - 12}
                 height={22}
               >
-                <div className={nameLineClasses(wonA, loserA)}>
+                <div className={nameLine(wonA, loserA)}>
                   {playerName(state, m.playerAId)}
                 </div>
               </foreignObject>
@@ -257,7 +226,7 @@ function BracketPanelSvg(props: {
                     y1={ly + boxH / 2}
                     x2={lx + boxW - 8}
                     y2={ly + boxH / 2}
-                    stroke={tone === 'salon' ? '#d4c4b0' : '#e4e4e7'}
+                    stroke="#e4e4e7"
                     strokeWidth={1}
                   />
                   <foreignObject
@@ -266,7 +235,7 @@ function BracketPanelSvg(props: {
                     width={boxW - 12}
                     height={22}
                   >
-                    <div className={nameLineClasses(wonB, loserB)}>
+                    <div className={nameLine(wonB, loserB)}>
                       {playerName(state, m.playerBId)}
                     </div>
                   </foreignObject>
@@ -278,9 +247,7 @@ function BracketPanelSvg(props: {
                   width={boxW - 12}
                   height={20}
                 >
-                  <div
-                    className={`text-[12px] italic leading-tight sm:text-[10px] ${tone === 'salon' ? 'text-[#8a7b6c]' : 'text-zinc-500'}`}
-                  >
+                  <div className="text-[12px] italic leading-tight text-zinc-500 sm:text-[10px]">
                     exempt
                   </div>
                 </foreignObject>
@@ -328,11 +295,7 @@ function layoutPanelMatches(
 }
 
 /** Tableau coupe v3 : panneaux par sous-tournoi ; legacy : une seule vue par ronde. */
-export function EliminationBracketTree({
-  state,
-  visualTone = 'default',
-}: Props) {
-  const cardTone = visualTone === 'salon' ? 'salon' : 'default'
+export function EliminationBracketTree({ state }: Props) {
   const elimPhoneLayout = useEliminationBracketPhoneLayout()
   const layoutDim = useMemo(
     () => phoneLayoutBracketOpts(elimPhoneLayout),
@@ -424,7 +387,6 @@ export function EliminationBracketTree({
     if (!legacyPanel?.laid.length) return null
     return (
       <Card
-        tone={cardTone}
         title="Tableau à élimination (coupe compacte sans sous-vues séparées)"
         className="mb-6"
       >
@@ -437,11 +399,8 @@ export function EliminationBracketTree({
           svgW={legacyPanel.svgW}
           svgH={legacyPanel.svgH}
           columnPhases={legacyPanel.columnPhases}
-          tone={visualTone}
         />
-        <p
-          className={`mt-2 max-w-4xl text-xs leading-snug ${visualTone === 'salon' ? 'text-[#5c4d42]' : 'text-zinc-500'}`}
-        >
+        <p className="mt-2 max-w-4xl text-xs leading-snug text-zinc-500">
           Lecture gauche→droite : phases successives du fichier importé ; les lignes relient les matchs où les vainqueurs se retrouvent.
         </p>
       </Card>
@@ -477,37 +436,28 @@ export function EliminationBracketTree({
     })
   }
 
-  const salon = visualTone === 'salon'
-
   return (
     <div className="mb-6">
-      <div
-        className={`mb-4 rounded-xl px-3 py-3 sm:flex sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-0 sm:py-0 ${salon ? 'salon-muted' : ''}`}
-      >
-        <p
-          className={`text-xs font-medium leading-snug ${salon ? 'text-[#4a3c33]' : 'text-zinc-600'}`}
-        >
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <p className="text-xs font-medium leading-snug text-zinc-600">
           Vues tableau : coupe, petite finale et mini-tableaux (classement
           synthétique plus bas).
         </p>
         {navSections.length > 1 ?
           <nav
-            className="mt-2 flex flex-wrap items-start gap-x-3 gap-y-2 text-xs leading-snug sm:mt-0 sm:items-center sm:gap-x-4 sm:text-xs"
+            className="flex flex-wrap items-start gap-x-3 gap-y-2 text-xs leading-snug sm:items-center sm:gap-x-4 sm:text-xs"
             aria-label="Aller aux vues du tableau à élimination"
           >
             {navSections.map(({ id, label }, i) => (
               <span key={id} className="inline-flex items-center gap-x-4">
                 {i ? (
-                  <span
-                    className={salon ? 'text-[#b8a894]' : 'text-zinc-300'}
-                    aria-hidden
-                  >
+                  <span className="text-zinc-300" aria-hidden>
                     ·
                   </span>
                 ) : null}
                 <a
                   href={`#${id}`}
-                  className={`font-medium underline underline-offset-2 ${salon ? 'text-[#5a3d28] decoration-[#a8896c]/60 hover:text-[#402a1a]' : 'text-zinc-800 hover:text-zinc-600'}`}
+                  className="font-medium text-zinc-800 underline underline-offset-2 hover:text-zinc-600"
                 >
                   {label}
                 </a>
@@ -516,14 +466,13 @@ export function EliminationBracketTree({
           </nav>
         : null}
       </div>
-      <div className="flex flex-col items-stretch gap-8">
+      <div className="flex flex-col items-stretch gap-6 lg:flex-row lg:flex-wrap lg:items-start">
         {v3Panels?.mainLayout?.laid.length ?
-          <section id="lb-elim-main" className="scroll-mt-20 w-full min-w-0">
-            <Card
-              tone={cardTone}
-              title="Coupe principale"
-              titleClassName="text-base lg:text-lg"
-            >
+          <section
+            id="lb-elim-main"
+            className="scroll-mt-20 w-full min-w-0 shrink-0 lg:min-w-[min(100%,280px)] lg:max-w-min lg:grow lg:basis-[min(100%,560px)]"
+          >
+            <Card title="Coupe principale" titleClassName="text-base lg:text-lg">
               <BracketPanelSvg
                 state={state}
                 ariaLabel="Coupe principale"
@@ -533,15 +482,16 @@ export function EliminationBracketTree({
                 svgW={v3Panels.mainLayout.svgW}
                 svgH={v3Panels.mainLayout.svgH}
                 columnPhases={v3Panels.mainLayout.columnPhases}
-                tone={visualTone}
               />
             </Card>
           </section>
         : null}
         {v3Panels?.bronzeLayout?.laid.length ?
-          <section id="lb-elim-bronze" className="scroll-mt-20 w-full min-w-0">
+          <section
+            id="lb-elim-bronze"
+            className="scroll-mt-20 w-full min-w-0 shrink-0 lg:min-w-[min(100%,260px)] lg:grow lg:basis-80"
+          >
             <Card
-              tone={cardTone}
               title="Petite finale — 3ᵉ place"
               titleClassName="text-base lg:text-lg"
             >
@@ -554,7 +504,6 @@ export function EliminationBracketTree({
                 svgW={v3Panels.bronzeLayout.svgW}
                 svgH={v3Panels.bronzeLayout.svgH}
                 columnPhases={v3Panels.bronzeLayout.columnPhases}
-                tone={visualTone}
               />
             </Card>
           </section>
@@ -564,23 +513,20 @@ export function EliminationBracketTree({
             <section
               key={`pl-${cohortKey}`}
               id={`lb-elim-placement-${cohortKey}`}
-              className="scroll-mt-20 w-full min-w-0"
+              className="scroll-mt-20 w-full min-w-0 shrink-0 lg:min-w-[min(100%,280px)] lg:grow lg:basis-96"
             >
-              <Card tone={cardTone} title={title} titleClassName="text-base lg:text-lg">
+              <Card title={title} titleClassName="text-base lg:text-lg">
                 <PlacementBracketDuelCards
                   state={state}
                   cohort={cohort}
                   lostAtRoundLabel={phaseFr}
-                  visualTone={visualTone}
                 />
               </Card>
             </section>
           )
         })}
       </div>
-      <p
-        className={`mt-3 max-w-4xl text-xs leading-snug ${salon ? 'text-[#5c4d42]' : 'text-zinc-500'}`}
-      >
+      <p className="mt-3 max-w-4xl text-xs leading-snug text-zinc-500">
         Sur la coupe, les lignes relient deux matchs quand leurs vainqueurs ou leurs perdants se retrouvent au tour suivant. Les perdants hors podium jouent ensuite des duels présentés en cartes (un duel = une carte) dans les mini-tableaux.
       </p>
     </div>

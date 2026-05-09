@@ -27,15 +27,15 @@ import { Table, Td, Th } from '../ui/Table'
 function roundCellToneClass(kind: LeaderboardRoundCellVariant): string {
   switch (kind) {
     case 'win':
-      return 'inline-block min-w-[1.85rem] rounded-md bg-[#dceee0] px-2 py-0.5 text-center text-xs font-semibold text-[#123524] whitespace-nowrap shadow-[inset_0_1px_0_rgb(255_255_255/0.5)] sm:text-[0.8125rem]'
+      return 'inline-block min-w-[1.85rem] rounded-md bg-emerald-100 px-2 py-0.5 text-center font-semibold text-emerald-950 whitespace-nowrap'
     case 'loss':
-      return 'text-[#7a7068]'
+      return 'text-zinc-500'
     case 'draw':
-      return 'inline-block rounded-md bg-[#f5e8d8] px-1.5 py-0.5 text-center text-xs font-medium text-[#4a3828] whitespace-nowrap sm:text-[0.8125rem]'
+      return 'inline-block rounded-md bg-amber-100/95 px-1.5 py-0.5 text-center font-medium text-amber-950 whitespace-nowrap'
     case 'bye':
-      return 'italic text-[#7d5f3a] text-xs whitespace-nowrap sm:text-[0.8125rem]'
+      return 'italic text-amber-800/90 text-xs whitespace-nowrap sm:text-[0.8125rem]'
     case 'pending':
-      return 'text-[#a89888]'
+      return 'text-zinc-400'
     default:
       return ''
   }
@@ -46,10 +46,8 @@ export function LeaderboardPage() {
 
   if (isSpectator && !state) {
     return (
-      <PageLayout surface="salon" title="Classement">
-        <p className="text-sm text-[#5c4d42]">
-          Agrégation des parties…
-        </p>
+      <PageLayout title="Classement">
+        <p className="text-sm text-zinc-600">Chargement…</p>
       </PageLayout>
     )
   }
@@ -118,101 +116,87 @@ export function LeaderboardPage() {
   }
 
   return (
-    <PageLayout
-      surface="salon"
-      title={`Classement — ${state.tournamentName}`}
-    >
-      {!isSpectator ?
-        <div className="salon-muted mb-6 flex flex-col gap-2 rounded-xl p-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
-          <p className="text-xs leading-snug text-[#484038]">
-            Exports réservés à l&apos;organisation.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="salon" onClick={exportTsv}>
-              Télécharger TSV
-            </Button>
-            <Button type="button" variant="salon" onClick={exportJson}>
-              JSON sauvegarde
-            </Button>
-            <Button type="button" variant="salon" onClick={() => void exportFullArchive()}>
-              Archive complète
-            </Button>
-          </div>
+    <PageLayout title={`Classement — ${state.tournamentName}`}>
+      {!isSpectator ? (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <Button type="button" variant="secondary" onClick={exportTsv}>
+            Télécharger TSV
+          </Button>
+          <Button type="button" variant="secondary" onClick={exportJson}>
+            Télécharger JSON (sauvegarde)
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => void exportFullArchive()}
+          >
+            Exporter (archive JSON)
+          </Button>
         </div>
-      : null}
-
-      <p className="mb-8 font-display text-sm font-medium italic text-[#4a392a]">
-        Tableau général · points et rondes
-      </p>
-
+      ) : null}
       {format === 'elimination' ?
-        <EliminationBracketTree state={state} visualTone="salon" />
+        <EliminationBracketTree state={state} />
       : null}
       {legacyElim ?
-        <p className="mb-4 rounded-lg border border-[#d4b896]/60 bg-[#faf3e9] px-3 py-2.5 text-sm text-[#5c3f24]">
+        <p className="mb-4 text-sm text-amber-900">
           Ce fichier provient de l&apos;ancien mode élimination (sans tableau
           coupe). Le classement aux points peut différer d&apos;une coupe ; la
           validation des rondes est désactivée.
         </p>
       : null}
-
       {/* Pleine largeur écran sur mobile (le main a max-w + px-4). */}
       <div className="relative left-1/2 w-[100vw] max-w-[100vw] -translate-x-1/2 px-4 sm:relative sm:left-0 sm:w-full sm:max-w-none sm:translate-x-0 sm:px-0">
-        <Card tone="salon">
-          <h2 className="font-display mb-3 text-[1.05rem] font-semibold text-[#2e2218] sm:text-xl">
-            Scores au fil des rondes
-          </h2>
+        <Card>
           <Table
             className={[
-              'salon-score-table',
               '[&_table]:w-full [&_table]:text-xs [&_table]:tabular-nums sm:[&_table]:text-sm',
               '[&_th]:px-2 [&_th]:py-1.5 sm:[&_th]:px-3 sm:[&_th]:py-2',
               '[&_td]:px-2 [&_td]:py-1.5 sm:[&_td]:px-3 sm:[&_td]:py-2',
             ].join(' ')}
           >
-            <thead>
-              <tr>
-                <Th>#</Th>
-                <Th>Joueur</Th>
-                <Th>
-                  {format === 'elimination' && !legacyElim ?
-                    'Victoires'
-                  : 'Score'}
+          <thead>
+            <tr>
+              <Th>#</Th>
+              <Th>Joueur</Th>
+              <Th>
+                {format === 'elimination' && !legacyElim ?
+                  'Victoires'
+                : 'Score'}
+              </Th>
+              {Array.from({ length: nRoundCols }, (_, i) => (
+                <Th key={i} className="whitespace-nowrap">
+                  {format === 'elimination'
+                    ? eliminationRoundColumnLabel(i + 1, state.maxRounds)
+                    : `R${i + 1}`}
                 </Th>
-                {Array.from({ length: nRoundCols }, (_, i) => (
-                  <Th key={i} className="whitespace-nowrap">
-                    {format === 'elimination'
-                      ? eliminationRoundColumnLabel(i + 1, state.maxRounds)
-                      : `R${i + 1}`}
-                  </Th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((p) => (
-                <tr
-                  key={p.id}
-                  data-salon-place={p.place <= 3 ? p.place : undefined}
-                >
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((p) => {
+              const podium =
+                p.place === 1 ?
+                  'bg-amber-50/95'
+                : p.place === 2 ?
+                  'bg-zinc-50/90'
+                : p.place === 3 ?
+                  'bg-orange-50/70'
+                : ''
+              return (
+                <tr key={p.id} className={podium}>
                   <Td className="font-medium tabular-nums">{p.place}</Td>
                   <Td
                     className={
                       p.place <= 3 ?
-                        'max-w-[11rem] font-semibold text-[#1f1812] sm:max-w-none'
-                      : 'max-w-[11rem] font-medium text-[#2e241d] sm:max-w-none'
+                        'max-w-[11rem] font-semibold text-zinc-950 sm:max-w-none'
+                      : 'max-w-[11rem] font-medium text-zinc-900 sm:max-w-none'
                     }
                   >
                     <span className="line-clamp-2 sm:line-clamp-none">
                       {p.name}
                     </span>
                   </Td>
-                  <Td
-                    className={
-                      p.place <= 3 ?
-                        'font-semibold tabular-nums text-[#1f1812]'
-                      : ''
-                    }
-                  >
+                  <Td className={p.place <= 3 ? 'font-semibold tabular-nums' : ''}>
                     {p.score}
                   </Td>
                   {Array.from({ length: nRoundCols }, (_, i) => {
@@ -229,9 +213,10 @@ export function LeaderboardPage() {
                     )
                   })}
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              )
+            })}
+          </tbody>
+        </Table>
         </Card>
       </div>
     </PageLayout>
