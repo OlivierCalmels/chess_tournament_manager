@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T16:25:11.214Z",
+  "updatedAt": "2026-05-09T16:25:13.100Z",
   "schemaVersion": 3,
   "tournamentId": "t-1778343799657-9nnaia",
   "tournamentName": "samedi 9 mai 2026 à 18:23",
@@ -252,10 +252,10 @@
           }
         }
       ],
-      "completed": false
+      "completed": true
     }
   ],
   "activeRoundIndex": 3,
-  "finished": false,
+  "finished": true,
   "eliminationLegacy": false
 }
