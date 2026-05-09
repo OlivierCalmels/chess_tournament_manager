@@ -123,10 +123,70 @@
           }
         }
       ],
+      "completed": true
+    },
+    {
+      "roundIndex": 2,
+      "pairings": [
+        {
+          "playerAId": "b3595e4c-21c1-4b51-84c0-50fd1c4434a0",
+          "playerBId": "5c79a76b-c365-418d-a81f-7e0a5d04c811",
+          "result": null,
+          "elim": {
+            "kind": "main",
+            "key": "main-1-0",
+            "mainDepth": 1,
+            "mainSlot": 0,
+            "connectFrom": [
+              "main-0-0",
+              "main-0-1"
+            ]
+          }
+        },
+        {
+          "playerAId": "28380caa-ed5d-4569-85e1-d9166247f02e",
+          "playerBId": "4fbdf74e-9555-4063-a686-de96bb352a54",
+          "result": null,
+          "elim": {
+            "kind": "main",
+            "key": "main-1-1",
+            "mainDepth": 1,
+            "mainSlot": 1,
+            "connectFrom": [
+              "main-0-2",
+              "main-0-3"
+            ]
+          }
+        },
+        {
+          "playerAId": "aa365464-e549-442f-9380-0ac8f6a5108c",
+          "playerBId": "d6f70b66-f4fa-4b3f-b2d7-30b1c9755bee",
+          "result": null,
+          "elim": {
+            "kind": "placement",
+            "key": "pl-m0-t0-s0",
+            "cohortMainDepth": 0,
+            "placementDepth": 0,
+            "placementSlot": 0
+          }
+        },
+        {
+          "playerAId": "12c38d94-a03c-44e5-993a-1355045fa799",
+          "playerBId": "e711c0ac-947b-4a62-a25c-c400d9be5f6d",
+          "result": null,
+          "elim": {
+            "kind": "placement",
+            "key": "pl-m0-t0-s1",
+            "cohortMainDepth": 0,
+            "placementDepth": 0,
+            "placementSlot": 1
+          }
+        }
+      ],
       "completed": false
     }
   ],
-  "activeRoundIndex": 1,
+  "activeRoundIndex": 2,
   "finished": false,
   "eliminationLegacy": false
 }
