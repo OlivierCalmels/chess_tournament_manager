@@ -15,7 +15,7 @@ export function PageLayout({
       <div className="salon-shell">
         <header className="salon-header">
           <div className="salon-header-chess">
-            <div className="mx-auto flex max-w-3xl flex-col gap-2 px-4 py-5 sm:max-w-5xl sm:flex-row sm:items-center sm:justify-between sm:py-6">
+            <div className="mx-auto flex w-full max-w-[min(100%,112rem)] flex-col gap-2 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-6 lg:px-10">
               <div className="relative z-[1]">
                 <div className="flex items-center gap-2">
                   <span className="text-lg leading-none text-amber-200/85" aria-hidden>
@@ -34,7 +34,7 @@ export function PageLayout({
             </div>
           </div>
         </header>
-        <main className="salon-main mx-auto max-w-3xl px-4 py-6 sm:max-w-5xl sm:px-5 sm:py-8">
+        <main className="salon-main mx-auto w-full max-w-[min(100%,112rem)] px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
           {children}
         </main>
       </div>

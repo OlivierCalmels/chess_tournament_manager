@@ -168,11 +168,17 @@ function BracketPanelSvg(props: {
   }
 
   return (
-    <div className="-mx-4 w-[calc(100%+2rem)] max-w-none touch-pan-x overflow-x-auto pb-2 sm:mx-0 sm:w-full sm:max-w-full">
+    <div
+      className={
+        '-mx-4 max-w-none pb-2 max-sm:w-[calc(100%+2rem)] max-sm:touch-pan-x max-sm:overflow-x-auto sm:mx-0 sm:w-full sm:overflow-x-visible'
+      }
+    >
       <svg
-        width={svgW}
-        height={svgH}
-        className="min-w-0 shrink-0 text-zinc-900"
+        viewBox={`0 0 ${svgW} ${svgH}`}
+        width="100%"
+        height="auto"
+        preserveAspectRatio="xMidYMin meet"
+        className="block h-auto min-w-0 max-w-full text-zinc-900 max-sm:min-w-[28rem] sm:min-w-0"
         role="img"
         aria-label={ariaLabel}
       >
@@ -510,12 +516,9 @@ export function EliminationBracketTree({
           </nav>
         : null}
       </div>
-      <div className="flex flex-col items-stretch gap-6 lg:flex-row lg:flex-wrap lg:items-start">
+      <div className="flex flex-col items-stretch gap-8">
         {v3Panels?.mainLayout?.laid.length ?
-          <section
-            id="lb-elim-main"
-            className="scroll-mt-20 w-full min-w-0 shrink-0 lg:min-w-[min(100%,280px)] lg:max-w-min lg:grow lg:basis-[min(100%,560px)]"
-          >
+          <section id="lb-elim-main" className="scroll-mt-20 w-full min-w-0">
             <Card
               tone={cardTone}
               title="Coupe principale"
@@ -536,10 +539,7 @@ export function EliminationBracketTree({
           </section>
         : null}
         {v3Panels?.bronzeLayout?.laid.length ?
-          <section
-            id="lb-elim-bronze"
-            className="scroll-mt-20 w-full min-w-0 shrink-0 lg:min-w-[min(100%,260px)] lg:grow lg:basis-80"
-          >
+          <section id="lb-elim-bronze" className="scroll-mt-20 w-full min-w-0">
             <Card
               tone={cardTone}
               title="Petite finale — 3ᵉ place"
@@ -564,7 +564,7 @@ export function EliminationBracketTree({
             <section
               key={`pl-${cohortKey}`}
               id={`lb-elim-placement-${cohortKey}`}
-              className="scroll-mt-20 w-full min-w-0 shrink-0 lg:min-w-[min(100%,280px)] lg:grow lg:basis-96"
+              className="scroll-mt-20 w-full min-w-0"
             >
               <Card tone={cardTone} title={title} titleClassName="text-base lg:text-lg">
                 <PlacementBracketDuelCards
