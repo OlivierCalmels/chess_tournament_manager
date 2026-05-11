@@ -1,10 +1,9 @@
 {
-  "updatedAt": "2026-05-11T08:56:01.747Z",
-  "schemaVersion": 3,
   "tournamentId": "t-1778489761725-wz538c",
   "tournamentName": "lundi 11 mai 2026 à 10:56",
   "maxRounds": 4,
   "format": "swiss",
+  "playerCount": 6,
   "createdAt": "2026-05-11T08:56:01.725Z",
   "players": [
     {
@@ -37,30 +36,5 @@
       "name": "Hedi",
       "elo": 550
     }
-  ],
-  "rounds": [
-    {
-      "roundIndex": 1,
-      "pairings": [
-        {
-          "playerAId": "ccd5fc2f-61a0-4db0-a627-f7112cb4fe0f",
-          "playerBId": "624682e5-3f27-44ec-bf17-ee52fad03006",
-          "result": null
-        },
-        {
-          "playerAId": "2e2e3d77-50c9-463e-b7ae-c0bb546aa738",
-          "playerBId": "1d245ef8-e699-4501-92f8-f18313e5ed43",
-          "result": null
-        },
-        {
-          "playerAId": "4466270b-4c28-4cf2-ae8f-e93444f58284",
-          "playerBId": "1e714d69-3d44-4e51-8ed8-b28524f8f501",
-          "result": null
-        }
-      ],
-      "completed": false
-    }
-  ],
-  "activeRoundIndex": 1,
-  "finished": false
+  ]
 }
