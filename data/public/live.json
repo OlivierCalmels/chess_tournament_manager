@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-11T09:11:40.044Z",
+  "updatedAt": "2026-05-11T09:11:41.952Z",
   "schemaVersion": 3,
   "tournamentId": "t-1778489762409-itqw0l",
   "tournamentName": "lundi 11 mai 2026 à 10:56",
@@ -139,7 +139,7 @@
         {
           "playerAId": "7959662d-20b3-4c74-a549-e18547c5d2f0",
           "playerBId": "787ed8ec-ece9-4a65-a777-e0c72c4bde69",
-          "result": null
+          "result": "B"
         }
       ],
       "completed": false
