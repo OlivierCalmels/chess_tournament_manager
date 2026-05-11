@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-11T09:05:34.861Z",
+  "updatedAt": "2026-05-11T09:05:36.599Z",
   "schemaVersion": 3,
   "tournamentId": "t-1778489762409-itqw0l",
   "tournamentName": "lundi 11 mai 2026 à 10:56",
@@ -121,10 +121,10 @@
           "result": "A"
         }
       ],
-      "completed": false
+      "completed": true
     }
   ],
   "activeRoundIndex": 4,
-  "finished": false,
+  "finished": true,
   "elimFirstRound": "elo"
 }
