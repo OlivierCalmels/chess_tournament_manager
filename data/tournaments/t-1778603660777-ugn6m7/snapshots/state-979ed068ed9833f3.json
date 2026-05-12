@@ -75,7 +75,7 @@
         {
           "playerAId": "7fc61593-f5f5-4006-9cb0-cceae6ef8d03",
           "playerBId": "dbb60483-b74a-4438-b148-4ea3f1a38297",
-          "result": "B"
+          "result": "A"
         }
       ],
       "completed": true
@@ -94,8 +94,8 @@
           "result": null
         },
         {
-          "playerAId": "dbb60483-b74a-4438-b148-4ea3f1a38297",
           "playerBId": "47ac7294-65b6-4417-9690-ecc13a6761de",
+          "playerAId": "dbb60483-b74a-4438-b148-4ea3f1a38297",
           "result": null
         }
       ],
