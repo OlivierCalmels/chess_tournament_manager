@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-12T18:14:38.062Z",
+  "updatedAt": "2026-05-12T18:14:39.978Z",
   "schemaVersion": 3,
   "tournamentId": "t-1778603660777-ugn6m7",
   "tournamentName": "mardi 12 mai 2026 à 18:34",
@@ -121,10 +121,10 @@
           "result": "A"
         }
       ],
-      "completed": false
+      "completed": true
     }
   ],
   "activeRoundIndex": 4,
-  "finished": false,
+  "finished": true,
   "elimFirstRound": "elo"
 }
