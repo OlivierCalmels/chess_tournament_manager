@@ -1,10 +1,9 @@
 {
-  "updatedAt": "2026-05-12T16:34:22.580Z",
-  "schemaVersion": 3,
   "tournamentId": "t-1778603660777-ugn6m7",
   "tournamentName": "mardi 12 mai 2026 à 18:34",
   "maxRounds": 4,
   "format": "swiss",
+  "playerCount": 6,
   "createdAt": "2026-05-12T16:34:20.777Z",
   "players": [
     {
@@ -37,30 +36,5 @@
       "name": "Paul W.",
       "elo": 500
     }
-  ],
-  "rounds": [
-    {
-      "roundIndex": 1,
-      "pairings": [
-        {
-          "playerAId": "7a00e1e7-eaa6-488a-8672-43a11b766458",
-          "playerBId": "dbb60483-b74a-4438-b148-4ea3f1a38297",
-          "result": null
-        },
-        {
-          "playerAId": "a43acba2-763d-4b68-b64a-e2b5ec2874e8",
-          "playerBId": "47ac7294-65b6-4417-9690-ecc13a6761de",
-          "result": null
-        },
-        {
-          "playerAId": "7fc61593-f5f5-4006-9cb0-cceae6ef8d03",
-          "playerBId": "2a80ec1f-33d4-42f7-9193-1dbf23fb6888",
-          "result": null
-        }
-      ],
-      "completed": false
-    }
-  ],
-  "activeRoundIndex": 1,
-  "finished": false
+  ]
 }
