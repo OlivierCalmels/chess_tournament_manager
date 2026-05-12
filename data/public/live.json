@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-12T16:59:58.478Z",
+  "updatedAt": "2026-05-12T17:00:00.505Z",
   "schemaVersion": 3,
   "tournamentId": "t-1778603660777-ugn6m7",
   "tournamentName": "mardi 12 mai 2026 à 18:34",
@@ -50,7 +50,7 @@
         {
           "playerAId": "a43acba2-763d-4b68-b64a-e2b5ec2874e8",
           "playerBId": "47ac7294-65b6-4417-9690-ecc13a6761de",
-          "result": null
+          "result": "A"
         },
         {
           "playerAId": "7fc61593-f5f5-4006-9cb0-cceae6ef8d03",
