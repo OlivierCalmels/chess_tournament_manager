@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-12T16:34:22.580Z",
+  "updatedAt": "2026-05-12T16:59:52.697Z",
   "schemaVersion": 3,
   "tournamentId": "t-1778603660777-ugn6m7",
   "tournamentName": "mardi 12 mai 2026 à 18:34",
@@ -45,7 +45,7 @@
         {
           "playerAId": "7a00e1e7-eaa6-488a-8672-43a11b766458",
           "playerBId": "dbb60483-b74a-4438-b148-4ea3f1a38297",
-          "result": null
+          "result": "A"
         },
         {
           "playerAId": "a43acba2-763d-4b68-b64a-e2b5ec2874e8",
@@ -62,5 +62,6 @@
     }
   ],
   "activeRoundIndex": 1,
-  "finished": false
+  "finished": false,
+  "elimFirstRound": "elo"
 }
